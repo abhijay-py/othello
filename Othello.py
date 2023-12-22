@@ -28,12 +28,18 @@ PIECE_BORDER_THICKNESS = 2
 def get_piece_location(x, y):
     return (FIRST_PIECE[0] + x * NEXT_PIECE_OFFSET, FIRST_PIECE[1] + y * NEXT_PIECE_OFFSET)
 
-#Create Board and Setup Starting Pieces.
+#Checks if coordinates are located within the board
+def within_board(x, y):
+    return x >= BOARD_START[0] and x <= BOARD_START[0] + BOARD_DIMENSIONS[0] and y >= BOARD_START[1] and y <= BOARD_START[1] + BOARD_DIMENSIONS[1] 
+
+#Create Board and Setup Starting Pieces. 1 Stands for White, 2 Stands for Black.
 board = [[0 for i in range(8)] for j in range(8)]
 board[3][3] = 1
 board[4][4] = 1
 board[3][4] = 2
 board[4][3] = 2
+
+current_color = 2 #Represents Black
 
 #Pygame Initialization
 pygame.init()
@@ -45,10 +51,31 @@ running = True
 player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
 
 while running:
+    mouseClicked = False
+    pos = (0, 0)
+
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+        if event.type == pygame.MOUSEBUTTONUP:
+            pos = pygame.mouse.get_pos()
+            mouseClicked = True
+        elif event.type == pygame.QUIT:
             running = False
 
+    #Place a piece down. FIX TO PLACE AT CORRECT PLACE
+    if mouseClicked & within_board(pos[0], pos[1]):
+        x, y = pos
+        x_coord = int((x - BOARD_START[0]) / NEXT_PIECE_OFFSET)
+        y_coord = int((y - BOARD_START[1]) / NEXT_PIECE_OFFSET)
+        
+        if board[x_coord][y_coord] == 0:
+            board[x_coord][y_coord] = current_color
+
+            if current_color == 1:
+                current_color = 2
+            else:
+                current_color = 1
+
+    #Fill in the Background
     screen.fill(BACKGROUND_PURPLE)
 
     #Draw the Board and Lines on the Board
@@ -84,6 +111,7 @@ while running:
                 pygame.draw.circle(screen, BORDER_RED, piece_location, PIECE_RADIUS, width = PIECE_BORDER_THICKNESS)
      
     pygame.display.flip()
+
     clock.tick(100)
 
 pygame.quit()
