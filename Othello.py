@@ -1,8 +1,9 @@
 import pygame
+from datetime import datetime, timedelta
 
 #COLORS
 BOARD_GREEN = (29, 171, 72)
-LIGHT_BOARD_GREEN = (61, 212, 101)
+LIGHT_BOARD_GREEN = (31, 184, 130)
 BACKGROUND_PURPLE = (91, 132, 199)
 BORDER_RED = (120, 16, 28)
 LINE_THICKNESS = 2
@@ -22,12 +23,17 @@ BORDER_THICKNESS = 5
 TEXT_LOCATION = (35, 20)
 BLACK_SCORE_LOCATION = (100, 625)
 WHITE_SCORE_LOCATION = (1075, 625)
+
 #Pieces
 PIECE_OFFSET = 10
 PIECE_RADIUS = (BOARD_DIMENSIONS[0] / 16) - PIECE_OFFSET
 FIRST_PIECE = (BOARD_START[0] + PIECE_RADIUS + PIECE_OFFSET, BOARD_START[1] + PIECE_RADIUS + PIECE_OFFSET)
 NEXT_PIECE_OFFSET = PIECE_OFFSET * 2 + PIECE_RADIUS  * 2
 PIECE_BORDER_THICKNESS = 2
+
+#OTHER
+TIME_IDLE_QUIT = 300 #Seconds
+FPS = 100 #Frames Per Second
 
 #Switches between colors
 def switch_colors(color):
@@ -130,6 +136,7 @@ def count_pieces(board):
     
     return whiteCount, blackCount
 
+
 #Create Board and Setup Starting Pieces. 1 Stands for White, 2 Stands for Black.
 board = [[0 for i in range(8)] for j in range(8)]
 board[3][3] = 1
@@ -138,7 +145,8 @@ board[3][4] = 2
 board[4][3] = 2
 
 current_color = 2 #Represents Black
-numberOfTurnsSkipped = 0 #If gets to two, end game.
+numberOfTurnsSkipped = 0 #If gets to two and the timer passes, end game.
+end_time = 0 #For when the game ends.
 
 #Pygame Initialization
 pygame.init()
@@ -148,8 +156,10 @@ pygame.display.set_caption("Othello")
 clock = pygame.time.Clock()
 running = True
 
+
 while running:
     mouseClicked = False
+    current_time = datetime.now()
     pos = (0, 0)
 
     for event in pygame.event.get():
@@ -162,10 +172,10 @@ while running:
     #Gets all possible moves for the current color. Changes the color if no moves exist. 
     moveList, moveDict = all_moves(board, current_color)
 
-    if len(moveList) == 0 and numberOfTurnsSkipped != 2:
+    if len(moveList) == 0:
         current_color = switch_colors(current_color)
         numberOfTurnsSkipped += 1
-    elif numberOfTurnsSkipped != 2:
+    else:
         numberOfTurnsSkipped = 0
 
     #Place a piece down.
@@ -191,8 +201,9 @@ while running:
             color_word = 'Black'
         textSurface = statusFont.render(color_word + "'s Turn to Move.", False, 'black')
         screen.blit(textSurface, TEXT_LOCATION)
-    
-    elif numberOfTurnsSkipped == 2:
+
+    elif numberOfTurnsSkipped >= 2:
+        
         whiteCount, blackCount = count_pieces(board)
         if whiteCount > blackCount:
             message = "Game Over. White Won!"
@@ -251,6 +262,12 @@ while running:
                 pygame.draw.circle(screen, BORDER_RED, piece_location, PIECE_RADIUS, width = PIECE_BORDER_THICKNESS)
      
     pygame.display.flip()
-    clock.tick(100)
+    clock.tick(FPS)
+    
+    #Timer to Break out from Program
+    if numberOfTurnsSkipped == 2:
+        end_time = datetime.now() + timedelta(seconds=TIME_IDLE_QUIT)
+    if numberOfTurnsSkipped >= 2 and current_time >= end_time:
+        break
 
 pygame.quit()
