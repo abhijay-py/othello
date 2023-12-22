@@ -31,10 +31,12 @@ FIRST_PIECE = (BOARD_START[0] + PIECE_RADIUS + PIECE_OFFSET, BOARD_START[1] + PI
 NEXT_PIECE_OFFSET = PIECE_OFFSET * 2 + PIECE_RADIUS  * 2
 PIECE_BORDER_THICKNESS = 2
 
-#OTHER
+#Other
 TIME_IDLE_QUIT = 300 #Seconds
 FPS = 100 #Frames Per Second
 
+
+#HELPER FUNCTIONS
 #Switches between colors
 def switch_colors(color):
     if color == 1:
@@ -137,37 +139,11 @@ def count_pieces(board):
     return whiteCount, blackCount
 
 
-#Create Board and Setup Starting Pieces. 1 Stands for White, 2 Stands for Black.
-board = [[0 for i in range(8)] for j in range(8)]
-board[3][3] = 1
-board[4][4] = 1
-board[3][4] = 2
-board[4][3] = 2
-
-current_color = 2 #Represents Black
-numberOfTurnsSkipped = 0 #If gets to two and the timer passes, end game.
-end_time = 0 #For when the game ends.
-
-#Pygame Initialization
-pygame.init()
-statusFont = pygame.font.SysFont('Times New Roman', 25)
-screen = pygame.display.set_mode(SCREEN_DIMENSIONS)
-pygame.display.set_caption("Othello")
-clock = pygame.time.Clock()
-running = True
-
-
-while running:
-    mouseClicked = False
-    current_time = datetime.now()
-    pos = (0, 0)
-
-    for event in pygame.event.get():
-        if event.type == pygame.MOUSEBUTTONUP:
-            pos = pygame.mouse.get_pos()
-            mouseClicked = True
-        elif event.type == pygame.QUIT:
-            running = False
+#STATES
+def game_state(board, screen, font, color, pos, turns, mouseClicked):
+    #Assign inputs to state variables
+    numberOfTurnsSkipped = turns 
+    current_color = color
 
     #Gets all possible moves for the current color. Changes the color if no moves exist. 
     moveList, moveDict = all_moves(board, current_color)
@@ -199,11 +175,10 @@ while running:
         color_word = 'White'
         if current_color == 2:
             color_word = 'Black'
-        textSurface = statusFont.render(color_word + "'s Turn to Move.", False, 'black')
+        textSurface = font.render(color_word + "'s Turn to Move.", False, 'black')
         screen.blit(textSurface, TEXT_LOCATION)
 
     elif numberOfTurnsSkipped >= 2:
-        
         whiteCount, blackCount = count_pieces(board)
         if whiteCount > blackCount:
             message = "Game Over. White Won!"
@@ -212,14 +187,14 @@ while running:
         else:
             message = "Game Over. It was a Tie."
 
-        textSurface = statusFont.render(message, False, 'black')
+        textSurface = font.render(message, False, 'black')
         screen.blit(textSurface, TEXT_LOCATION)
 
     #Put Score Text
     whiteCount, blackCount = count_pieces(board)
-    textSurface = statusFont.render(f"White: {whiteCount}", False, 'black')
+    textSurface = font.render(f"White: {whiteCount}", False, 'black')
     screen.blit(textSurface, WHITE_SCORE_LOCATION)
-    textSurface = statusFont.render(f"Black: {blackCount}", False, 'black')
+    textSurface = font.render(f"Black: {blackCount}", False, 'black')
     screen.blit(textSurface, BLACK_SCORE_LOCATION)
 
     #Draw the Board
@@ -260,14 +235,53 @@ while running:
                 piece_location = get_piece_location(x = i, y = j)        
                 pygame.draw.circle(screen, color, piece_location, PIECE_RADIUS)
                 pygame.draw.circle(screen, BORDER_RED, piece_location, PIECE_RADIUS, width = PIECE_BORDER_THICKNESS)
-     
+
+    return current_color, numberOfTurnsSkipped
+
+
+#Create Board and Setup Starting Pieces. 1 Stands for White, 2 Stands for Black.
+board = [[0 for i in range(8)] for j in range(8)]
+board[3][3] = 1
+board[4][4] = 1
+board[3][4] = 2
+board[4][3] = 2
+
+current_color = 2 #Represents Black
+numberOfTurnsSkipped = 0 #If gets to two and the timer passes, end game.
+end_time = datetime.now() + timedelta(seconds=TIME_IDLE_QUIT) #For when the game ends.
+state = 1 #0 will be menu state, 1 is game state
+
+#Pygame Initialization
+pygame.init()
+statusFont = pygame.font.SysFont('Times New Roman', 25)
+screen = pygame.display.set_mode(SCREEN_DIMENSIONS)
+pygame.display.set_caption("Othello")
+clock = pygame.time.Clock()
+running = True
+
+
+while running:
+    mouseClicked = False
+    current_time = datetime.now()
+    pos = (0, 0)
+
+    for event in pygame.event.get():
+        if event.type == pygame.MOUSEBUTTONUP:
+            pos = pygame.mouse.get_pos()
+            mouseClicked = True
+        elif event.type == pygame.QUIT:
+            running = False
+
+    if state == 1:
+        current_color, numberOfTurnsSkipped = game_state(board, screen, statusFont, current_color, pos, numberOfTurnsSkipped, mouseClicked)
+
     pygame.display.flip()
     clock.tick(FPS)
     
-    #Timer to Break out from Program
-    if numberOfTurnsSkipped == 2:
+    #Timer to Break out from Program if idle for too long
+    if mouseClicked:
         end_time = datetime.now() + timedelta(seconds=TIME_IDLE_QUIT)
-    if numberOfTurnsSkipped >= 2 and current_time >= end_time:
+    if current_time >= end_time:
         break
 
 pygame.quit()
