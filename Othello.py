@@ -6,8 +6,8 @@ BACKGROUND_PURPLE = (91, 132, 199)
 BORDER_RED = (120, 16, 28)
 LINE_THICKNESS = 2
 
-#DIMENSIONS
 
+#DIMENSIONS
 #Screen
 SCREEN_DIMENSIONS = (1280, 720)
 
@@ -35,6 +35,7 @@ board[4][4] = 1
 board[3][4] = 2
 board[4][3] = 2
 
+#Pygame Initialization
 pygame.init()
 screen = pygame.display.set_mode(SCREEN_DIMENSIONS)
 pygame.display.set_caption("Othello")
@@ -82,20 +83,7 @@ while running:
                 pygame.draw.circle(screen, color, piece_location, PIECE_RADIUS)
                 pygame.draw.circle(screen, BORDER_RED, piece_location, PIECE_RADIUS, width = PIECE_BORDER_THICKNESS)
      
-    #pygame.draw.circle(screen, "red", player_pos, 40)
-
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_w]:
-        player_pos.y -= 300 * dt
-    if keys[pygame.K_s]:
-        player_pos.y += 300 * dt
-    if keys[pygame.K_a]:
-        player_pos.x -= 300 * dt
-    if keys[pygame.K_d]:
-        player_pos.x += 300 * dt
-
     pygame.display.flip()
-
-    dt = clock.tick(100) / 1000
+    clock.tick(100)
 
 pygame.quit()
