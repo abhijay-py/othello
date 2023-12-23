@@ -7,13 +7,15 @@ from helper_files.constants import BOARD_GREEN, LIGHT_BOARD_GREEN, BACKGROUND_BL
 from helper_files.constants import BORDER_RED, TEXT_BOX_ORANGE, SCREEN_DIMENSIONS, LINE_THICKNESS
 from helper_files.constants import BOARD_EDGE_RADIUS, BOARD_DIMENSIONS, BOARD_START, BORDER_THICKNESS
 from helper_files.constants import TURN_LOCATION, BLACK_SCORE_LOCATION, WHITE_SCORE_LOCATION
-from helper_files.constants import PIECE_OFFSET, PIECE_BORDER_THICKNESS, PIECE_RADIUS, FIRST_PIECE, MENU_TITLE_BOX
+from helper_files.constants import PIECE_OFFSET, PIECE_BORDER_THICKNESS, PIECE_RADIUS, FIRST_PIECE
 from helper_files.constants import MENU_TITLE_LOCATION_MM, TEXT_BOX_OFFSET, TITLE_BORDER, TEXT_BOX_CORNER
-from helper_files.constants import MIDMENU_TITLE_BOX, TIME_IDLE_QUIT, FPS, NEXT_PIECE_OFFSET, MENU_TITLE_LOCATION
+from helper_files.constants import MIDMENU_TITLE_BOX, TIME_IDLE_QUIT, FPS, NEXT_PIECE_OFFSET
 from helper_files.constants import MENU_STATE, CREATE_GAME_STATE, GAME_STATE, MENU_MIDGAME_STATE
 from helper_files.constants import INFO_STATE, CREDITS_STATE, QUIT_STATE, ANTIALIAS_SETTING, QUIT_LOCATION
-from helper_files.constants import RG_LOCATION, RG_BOX, MIDMENU_LOCATION, MIDMENU_BOX, QUIT_BOX, MM_QUIT_LOCATION
+from helper_files.constants import RG_LOCATION, RG_BOX, MIDMENU_LOCATION, MIDMENU_BOX, QUIT_BOX
+from helper_files.constants import MM_QUIT_LOCATION, MENU_TITLE_BOX, INFO_TITLE_LOCATION, INFO_TITLE_BOX
 from helper_files.constants import NG_LOCATION, NG_BOX, INFO_LOCATION, INFO_BOX, CRED_LOCATION, CRED_BOX
+from helper_files.constants import INFO_TEXT_LOCATION, MENU_TITLE_LOCATION
 
 #Importing Helpers
 from helper_files.helpers import switch_colors, try_remove, get_piece_location, within_board, within_board_coords
@@ -172,6 +174,25 @@ def menu_state(screen, regular_font, title_font, pos, mouseClicked):
 
     return MENU_STATE
 
+def info_state(screen, text_font, title_font, pos, mouseClicked):
+    #Draw Background
+    screen.fill(BACKGROUND_GREEN)
+
+    #Spacing Reference Lines (will delete)
+    pygame.draw.line(screen, "black", (SCREEN_DIMENSIONS[0]/2, 0), 
+        (SCREEN_DIMENSIONS[0]/2, SCREEN_DIMENSIONS[1]), width = LINE_THICKNESS)
+    pygame.draw.line(screen, "black", (0, SCREEN_DIMENSIONS[1]/2), 
+        (SCREEN_DIMENSIONS[0], SCREEN_DIMENSIONS[1]/2), width = LINE_THICKNESS)
+
+    pygame.draw.rect(screen, TEXT_BOX_ORANGE, (tuple_op(INFO_TITLE_LOCATION, TEXT_BOX_OFFSET, SUB_TUPLE), 
+                INFO_TITLE_BOX), border_radius = TEXT_BOX_CORNER)
+    pygame.draw.rect(screen, "black", (tuple_op(INFO_TITLE_LOCATION, TEXT_BOX_OFFSET, SUB_TUPLE), 
+                INFO_TITLE_BOX), border_radius = TEXT_BOX_CORNER, width = TITLE_BORDER)
+    write_text("Information", screen, title_font, "black", INFO_TITLE_LOCATION)
+
+    write_text("Testing", screen, text_font, "black", INFO_TEXT_LOCATION)
+
+    return INFO_STATE
 
 #Create Board and Setup Starting Pieces. 1 Stands for White, 2 Stands for Black.
 board = [[0 for i in range(8)] for j in range(8)]
@@ -183,7 +204,7 @@ board[4][3] = 2
 current_color = 2 #Represents Black
 numberOfTurnsSkipped = 0 #If gets to two and the timer passes, end game.
 end_time = datetime.now() + timedelta(seconds=TIME_IDLE_QUIT) #For when the game ends.
-state = MENU_STATE #Works with the States listed in Constants
+state = INFO_STATE #Works with the States listed in Constants
 
 #Pygame Initialization
 pygame.init()
@@ -227,9 +248,10 @@ while running:
             state = MENU_MIDGAME_STATE
     elif state == MENU_MIDGAME_STATE:
         state = mid_game_menu_state(screen, tnrMenuFont, tnrLargeFont, pos, mouseClicked)
+        if mPressed:
+            state = GAME_STATE
     elif state == INFO_STATE:
-        print("INFO")
-        state = MENU_STATE
+        state = info_state(screen, tnrMediumFont, tnrLargeFont, pos, mouseClicked)
     elif state == CREDITS_STATE:
         print("CREDITS")
         state = MENU_STATE
