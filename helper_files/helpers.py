@@ -1,6 +1,9 @@
+import pygame
+
 from helper_files.constants import FIRST_PIECE, NEXT_PIECE_OFFSET, FIRST_PIECE, NEXT_PIECE_OFFSET
 from helper_files.constants import BOARD_START, BOARD_DIMENSIONS, ANTIALIAS_SETTING
 from helper_files.constants import ADD_TUPLE, SUB_TUPLE, MULT_TUPLE, ADD_DIGIT, SUB_DIGIT, MULT_DIGIT
+from helper_files.constants import TEXT_BOX_OFFSET, TEXT_BOX_CORNER, OPTION_BORDER, TEXT_BOX_GREEN
 
 #HELPER FUNCTIONS
 #Switches between colors
@@ -128,4 +131,13 @@ def tuple_op(tuple_1, num_2, operation):
     elif operation == MULT_DIGIT:
         return (tuple_1[0] * num_2, tuple_1[1] * num_2)
     
+#Create a text box
+def create_box(screen, font, text, loc, box):
+    tl = tuple_op(loc, TEXT_BOX_OFFSET, SUB_TUPLE)
+    br = tuple_op(tl, box, ADD_TUPLE)
 
+    pygame.draw.rect(screen, TEXT_BOX_GREEN, (tl, box), border_radius = TEXT_BOX_CORNER)
+    pygame.draw.rect(screen, "black", (tl, box), border_radius = TEXT_BOX_CORNER, width = OPTION_BORDER)
+    write_text(text, screen, font, "black", loc)
+
+    return tl, br
