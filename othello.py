@@ -2,23 +2,23 @@ import pygame
 from datetime import datetime, timedelta
 
 #Importing Constants
-from constants import ADD_TUPLE, SUB_TUPLE, MULT_TUPLE, ADD_DIGIT, SUB_DIGIT, MULT_DIGIT
-from constants import BOARD_GREEN, LIGHT_BOARD_GREEN, BACKGROUND_BLUE, BACKGROUND_GREEN 
-from constants import BORDER_RED, TEXT_BOX_ORANGE, SCREEN_DIMENSIONS, LINE_THICKNESS
-from constants import BOARD_EDGE_RADIUS, BOARD_DIMENSIONS, BOARD_START, BORDER_THICKNESS
-from constants import TURN_LOCATION, BLACK_SCORE_LOCATION, WHITE_SCORE_LOCATION
-from constants import PIECE_OFFSET, PIECE_BORDER_THICKNESS, PIECE_RADIUS, FIRST_PIECE
-from constants import MENU_TITLE_LOCATION, TEXT_BOX_OFFSET, TITLE_BORDER, TEXT_BOX_CORNER
-from constants import MIDMENU_TITLE_BOX, TIME_IDLE_QUIT, FPS, NEXT_PIECE_OFFSET
-from constants import MENU_STATE, CREATE_GAME_STATE, GAME_STATE, MENU_MIDGAME_STATE, RESTART_GAME_STATE
-from constants import INFO_STATE, CREDITS_STATE, QUIT_STATE, ANTIALIAS_SETTING
+from helper_files.constants import ADD_TUPLE, SUB_TUPLE, MULT_TUPLE, ADD_DIGIT, SUB_DIGIT, MULT_DIGIT
+from helper_files.constants import BOARD_GREEN, LIGHT_BOARD_GREEN, BACKGROUND_BLUE, BACKGROUND_GREEN 
+from helper_files.constants import BORDER_RED, TEXT_BOX_ORANGE, SCREEN_DIMENSIONS, LINE_THICKNESS
+from helper_files.constants import BOARD_EDGE_RADIUS, BOARD_DIMENSIONS, BOARD_START, BORDER_THICKNESS
+from helper_files.constants import TURN_LOCATION, BLACK_SCORE_LOCATION, WHITE_SCORE_LOCATION
+from helper_files.constants import PIECE_OFFSET, PIECE_BORDER_THICKNESS, PIECE_RADIUS, FIRST_PIECE
+from helper_files.constants import MENU_TITLE_LOCATION, TEXT_BOX_OFFSET, TITLE_BORDER, TEXT_BOX_CORNER
+from helper_files.constants import MIDMENU_TITLE_BOX, TIME_IDLE_QUIT, FPS, NEXT_PIECE_OFFSET
+from helper_files.constants import MENU_STATE, CREATE_GAME_STATE, GAME_STATE, MENU_MIDGAME_STATE, RESTART_GAME_STATE
+from helper_files.constants import INFO_STATE, CREDITS_STATE, QUIT_STATE, ANTIALIAS_SETTING
 
 #Importing Helpers
-from helpers import switch_colors, try_remove, get_piece_location, within_board, within_board_coords
-from helpers import within_box, all_moves, count_pieces, write_text, tuple_op
+from helper_files.helpers import switch_colors, try_remove, get_piece_location, within_board, within_board_coords
+from helper_files.helpers import within_box, all_moves, count_pieces, write_text, tuple_op
 
 #Importing Text Boxes
-from text_boxes import create_menu_box, create_mm_quit, create_rg_box
+from helper_files.text_boxes import create_menu_box, create_mm_quit, create_rg_box
 
 
 #STATES

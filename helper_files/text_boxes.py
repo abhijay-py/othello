@@ -1,10 +1,10 @@
 import pygame
 
-from constants import ADD_TUPLE, SUB_TUPLE, MULT_TUPLE, ADD_DIGIT, SUB_DIGIT, MULT_DIGIT
-from constants import RG_LOCATION, RG_BOX, MIDMENU_LOCATION, MIDMENU_BOX, QUIT_BOX, MM_QUIT_LOCATION
-from constants import TEXT_BOX_OFFSET, TEXT_BOX_CORNER, OPTION_BORDER, TEXT_BOX_GREEN
+from helper_files.constants import ADD_TUPLE, SUB_TUPLE, MULT_TUPLE, ADD_DIGIT, SUB_DIGIT, MULT_DIGIT
+from helper_files.constants import RG_LOCATION, RG_BOX, MIDMENU_LOCATION, MIDMENU_BOX, QUIT_BOX, MM_QUIT_LOCATION
+from helper_files.constants import TEXT_BOX_OFFSET, TEXT_BOX_CORNER, OPTION_BORDER, TEXT_BOX_GREEN
 
-from helpers import tuple_op, write_text
+from helper_files.helpers import tuple_op, write_text
 
 #MENU HELPERS
 def create_rg_box(screen, font):
