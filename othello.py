@@ -15,7 +15,8 @@ from helper_files.constants import INFO_STATE, CREDITS_STATE, QUIT_STATE, ANTIAL
 from helper_files.constants import RG_LOCATION, RG_BOX, MIDMENU_LOCATION, MIDMENU_BOX, QUIT_BOX
 from helper_files.constants import MM_QUIT_LOCATION, MENU_TITLE_BOX, INFO_TITLE_LOCATION, INFO_TITLE_BOX
 from helper_files.constants import NG_LOCATION, NG_BOX, INFO_LOCATION, INFO_BOX, CRED_LOCATION, CRED_BOX
-from helper_files.constants import INFO_TEXT_LOCATION, MENU_TITLE_LOCATION
+from helper_files.constants import INFO_TEXT_LOCATION, MENU_TITLE_LOCATION, TEXT_OFFSET, BACK_I_LOC
+from helper_files.constants import BACK_I_BOX
 
 #Importing Helpers
 from helper_files.helpers import switch_colors, try_remove, get_piece_location, within_board, within_board_coords
@@ -174,7 +175,44 @@ def menu_state(screen, regular_font, title_font, pos, mouseClicked):
 
     return MENU_STATE
 
-def info_state(screen, text_font, title_font, pos, mouseClicked):
+def info_state(screen, text_font, menu_font, title_font, pos, mouseClicked):
+    #Draw Background
+    screen.fill(BACKGROUND_GREEN)
+
+    #Title
+    pygame.draw.rect(screen, TEXT_BOX_ORANGE, (tuple_op(INFO_TITLE_LOCATION, TEXT_BOX_OFFSET, SUB_TUPLE), 
+                INFO_TITLE_BOX), border_radius = TEXT_BOX_CORNER)
+    pygame.draw.rect(screen, "black", (tuple_op(INFO_TITLE_LOCATION, TEXT_BOX_OFFSET, SUB_TUPLE), 
+                INFO_TITLE_BOX), border_radius = TEXT_BOX_CORNER, width = TITLE_BORDER)
+    write_text("Information", screen, title_font, "black", INFO_TITLE_LOCATION)
+
+    #Text
+    write_text("Othello is a strategy game that involves flipping pieces.", screen, text_font, "black", INFO_TEXT_LOCATION)
+    write_text("The person with the most remaining pieces at the end wins.", screen, text_font, "black", 
+        tuple_op(INFO_TEXT_LOCATION, (-10, TEXT_OFFSET), ADD_TUPLE))
+    write_text("Each person takes turn placing a piece, with black starting.", screen, text_font, "black",
+        tuple_op(INFO_TEXT_LOCATION, (-5, 2*TEXT_OFFSET), ADD_TUPLE))
+    write_text("A move consists of placing a piece such that a piece of the opposite ", screen, text_font, "black",
+        tuple_op(INFO_TEXT_LOCATION, (-40, 3*TEXT_OFFSET), ADD_TUPLE))
+    write_text("color lies in between your move and another one of your pieces.", screen, text_font, "black",
+        tuple_op(INFO_TEXT_LOCATION, (-30, 4*TEXT_OFFSET), ADD_TUPLE))
+    write_text("Then, all pieces inbetween will flip colors to the mover's side.", screen, text_font, "black",
+        tuple_op(INFO_TEXT_LOCATION, (-20, 5*TEXT_OFFSET), ADD_TUPLE))
+    write_text("In this game, all possible moves will be highlighted.", screen, text_font, "black",
+        tuple_op(INFO_TEXT_LOCATION, (10, 6*TEXT_OFFSET), ADD_TUPLE))
+    write_text("Press M when in game to access the in-game menu.", screen, text_font, "black",
+        tuple_op(INFO_TEXT_LOCATION, (15, 7*TEXT_OFFSET), ADD_TUPLE))
+
+    #Back to Menu
+    back_tl, back_br = create_box(screen, menu_font, "Back", BACK_I_LOC, BACK_I_BOX)
+
+    #Option Logic
+    if mouseClicked and within_box(pos[0], pos[1], back_tl, back_br):
+        return MENU_STATE
+
+    return INFO_STATE
+
+def credits_state(screen, text_font, menu_font, title_font, pos, mouseClicked):
     #Draw Background
     screen.fill(BACKGROUND_GREEN)
 
@@ -184,15 +222,7 @@ def info_state(screen, text_font, title_font, pos, mouseClicked):
     pygame.draw.line(screen, "black", (0, SCREEN_DIMENSIONS[1]/2), 
         (SCREEN_DIMENSIONS[0], SCREEN_DIMENSIONS[1]/2), width = LINE_THICKNESS)
 
-    pygame.draw.rect(screen, TEXT_BOX_ORANGE, (tuple_op(INFO_TITLE_LOCATION, TEXT_BOX_OFFSET, SUB_TUPLE), 
-                INFO_TITLE_BOX), border_radius = TEXT_BOX_CORNER)
-    pygame.draw.rect(screen, "black", (tuple_op(INFO_TITLE_LOCATION, TEXT_BOX_OFFSET, SUB_TUPLE), 
-                INFO_TITLE_BOX), border_radius = TEXT_BOX_CORNER, width = TITLE_BORDER)
-    write_text("Information", screen, title_font, "black", INFO_TITLE_LOCATION)
-
-    write_text("Testing", screen, text_font, "black", INFO_TEXT_LOCATION)
-
-    return INFO_STATE
+    return CREDITS_STATE
 
 #Create Board and Setup Starting Pieces. 1 Stands for White, 2 Stands for Black.
 board = [[0 for i in range(8)] for j in range(8)]
@@ -251,10 +281,9 @@ while running:
         if mPressed:
             state = GAME_STATE
     elif state == INFO_STATE:
-        state = info_state(screen, tnrMediumFont, tnrLargeFont, pos, mouseClicked)
+        state = info_state(screen, tnrMediumFont, tnrMenuFont, tnrLargeFont, pos, mouseClicked)
     elif state == CREDITS_STATE:
-        print("CREDITS")
-        state = MENU_STATE
+        state = credits_state(screen, tnrMediumFont, tnrMenuFont, tnrLargeFont, pos, mouseClicked)
     elif state == QUIT_STATE:
         running = False
     else:
