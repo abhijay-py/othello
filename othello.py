@@ -1,6 +1,6 @@
 import pygame
 from datetime import datetime, timedelta
- 
+
 #Importing Constants
 from helper_files.constants import ADD_TUPLE, SUB_TUPLE, MULT_TUPLE, ADD_DIGIT, SUB_DIGIT, MULT_DIGIT
 from helper_files.constants import BOARD_GREEN, LIGHT_BOARD_GREEN, BACKGROUND_BLUE, BACKGROUND_GREEN 
