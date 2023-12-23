@@ -1,145 +1,28 @@
 import pygame
 from datetime import datetime, timedelta
 
-#COLORS
-BOARD_GREEN = (29, 171, 72)
-LIGHT_BOARD_GREEN = (31, 184, 130)
-BACKGROUND_PURPLE = (91, 132, 199)
-BORDER_RED = (120, 16, 28)
-LINE_THICKNESS = 2
+#Importing Constants
+from constants import ADD_TUPLE, SUB_TUPLE, MULT_TUPLE, ADD_DIGIT, SUB_DIGIT, MULT_DIGIT
+from constants import BOARD_GREEN, LIGHT_BOARD_GREEN, BACKGROUND_BLUE, BACKGROUND_GREEN 
+from constants import BORDER_RED, TEXT_BOX_ORANGE, SCREEN_DIMENSIONS, LINE_THICKNESS
+from constants import BOARD_EDGE_RADIUS, BOARD_DIMENSIONS, BOARD_START, BORDER_THICKNESS
+from constants import TURN_LOCATION, BLACK_SCORE_LOCATION, WHITE_SCORE_LOCATION
+from constants import PIECE_OFFSET, PIECE_BORDER_THICKNESS, PIECE_RADIUS, FIRST_PIECE
+from constants import MENU_TITLE_LOCATION, TEXT_BOX_OFFSET, TITLE_BORDER, TEXT_BOX_CORNER
+from constants import MIDMENU_TITLE_BOX, TIME_IDLE_QUIT, FPS, NEXT_PIECE_OFFSET
+from constants import MENU_STATE, CREATE_GAME_STATE, GAME_STATE, MENU_MIDGAME_STATE, RESTART_GAME_STATE
+from constants import INFO_STATE, CREDITS_STATE, QUIT_STATE, ANTIALIAS_SETTING
 
+#Importing Helpers
+from helpers import switch_colors, try_remove, get_piece_location, within_board, within_board_coords
+from helpers import within_box, all_moves, count_pieces, write_text, tuple_op
 
-#DIMENSIONS
-#Screen
-SCREEN_DIMENSIONS = (1280, 720)
-
-#Board
-BOARD_EDGE_RADIUS = 5
-BOARD_DIMENSIONS = (648, 648)
-BOARD_START = (316, 36)
-BORDER_THICKNESS = 5
-
-#Text
-TEXT_LOCATION = (35, 20)
-BLACK_SCORE_LOCATION = (100, 625)
-WHITE_SCORE_LOCATION = (1075, 625)
-
-#Pieces
-PIECE_OFFSET = 10
-PIECE_RADIUS = (BOARD_DIMENSIONS[0] / 16) - PIECE_OFFSET
-FIRST_PIECE = (BOARD_START[0] + PIECE_RADIUS + PIECE_OFFSET, BOARD_START[1] + PIECE_RADIUS + PIECE_OFFSET)
-NEXT_PIECE_OFFSET = PIECE_OFFSET * 2 + PIECE_RADIUS  * 2
-PIECE_BORDER_THICKNESS = 2
-
-#Other
-TIME_IDLE_QUIT = 300 #Seconds
-FPS = 100 #Frames Per Second
-
-
-#HELPER FUNCTIONS
-#Switches between colors
-def switch_colors(color):
-    if color == 1:
-        return 2
-    return 1
-
-#Removes an element within an array. If error, then nothing happens.
-def try_remove(array, item):
-    try:
-        array.remove(item)
-    except:
-        pass
-    return array
-
-#Get location of the a specified piece
-def get_piece_location(x, y):
-    return (FIRST_PIECE[0] + x * NEXT_PIECE_OFFSET, FIRST_PIECE[1] + y * NEXT_PIECE_OFFSET)
-
-#Checks if pixel coordinates are located within the board
-def within_board(x, y):
-    return x >= BOARD_START[0] and x <= BOARD_START[0] + BOARD_DIMENSIONS[0] and y >= BOARD_START[1] and y <= BOARD_START[1] + BOARD_DIMENSIONS[1] 
-
-#Checks if board coordinates are located within the board
-def within_board_coords(x, y):
-    return x <= 7 and x >= 0 and y <= 7 and y >= 0
-
-#Gets all the moves valid and the resulting changes.
-def all_moves(board, color):
-    moves = []
-    removed = []
-    other_color = switch_colors(color)
-
-    for x in range(8):
-        for y in range(8):
-            move_removed = []
-            validSpace = False
-            opp_color_directions = [(i, j) for i in range(-1, 2) for j in range(-1, 2) if i != j or i != 0]
-            #If space is blank
-            if board[x][y] == 0:
-                #Remove edge cases for x + y from locations where opposite color could be
-                if x == 0:
-                    opp_color_directions = try_remove(opp_color_directions, (-1, 0))
-                    opp_color_directions = try_remove(opp_color_directions, (-1, 1))
-                    opp_color_directions = try_remove(opp_color_directions, (-1, -1))
-                elif x == 7:
-                    opp_color_directions = try_remove(opp_color_directions, (1, 0))
-                    opp_color_directions = try_remove(opp_color_directions, (1, 1))
-                    opp_color_directions = try_remove(opp_color_directions, (1, -1))
-
-                if y == 0:
-                    opp_color_directions = try_remove(opp_color_directions, (-1, -1))
-                    opp_color_directions = try_remove(opp_color_directions, (1, -1))
-                    opp_color_directions = try_remove(opp_color_directions, (0, -1))
-                elif y == 7:
-                    opp_color_directions = try_remove(opp_color_directions, (-1, 1))
-                    opp_color_directions = try_remove(opp_color_directions, (1, 1))
-                    opp_color_directions = try_remove(opp_color_directions, (0, 1))
-                
-                #Remove all directions where opposite color isn't there
-                for i, j in opp_color_directions:
-                    x_new = x
-                    y_new = y
-                    if board[x + i][y + j] == other_color:
-                        x_new += i
-                        y_new += j
-                        tempRemoved = []
-                        #Iterate till you find the other end or a blank space
-                        while within_board_coords(x_new, y_new):
-                            if board[x_new][y_new] == color:
-                                validSpace = True
-                                move_removed.extend(tempRemoved)                        
-                            elif board[x_new][y_new] == 0:
-                                break
-                            else:
-                                tempRemoved.append((x_new, y_new))
-
-                            x_new += i
-                            y_new += j
-
-                if validSpace:
-                    moves.append((x,y))
-                    removed.append(move_removed) 
-    
-    movesKeys = [str(i) + str(j) for i, j in moves]
-    moveDict = dict(map(lambda i,j : (i,j) , movesKeys, removed))
-    return moves, moveDict
-
-#Counts pieces for black and white
-def count_pieces(board):
-    whiteCount = 0
-    blackCount = 0
-
-    for x in range(8):
-        for y in range(8):
-            if board[x][y] == 1:
-                whiteCount += 1
-            elif board[x][y] == 2:
-                blackCount += 1
-    
-    return whiteCount, blackCount
+#Importing Text Boxes
+from text_boxes import create_menu_box, create_mm_quit, create_rg_box
 
 
 #STATES
+#TODO: ADD BOXES AROUND TEXT
 def game_state(board, screen, font, color, pos, turns, mouseClicked):
     #Assign inputs to state variables
     numberOfTurnsSkipped = turns 
@@ -168,15 +51,14 @@ def game_state(board, screen, font, color, pos, turns, mouseClicked):
             current_color = switch_colors(current_color)
 
     #Fill in the Background
-    screen.fill(BACKGROUND_PURPLE)
+    screen.fill(BACKGROUND_BLUE)
 
     #Put Turn Text
     if numberOfTurnsSkipped == 0:
         color_word = 'White'
         if current_color == 2:
             color_word = 'Black'
-        textSurface = font.render(color_word + "'s Turn to Move.", False, 'black')
-        screen.blit(textSurface, TEXT_LOCATION)
+        write_text(color_word + "'s Turn to Move.", screen, font, 'black', TURN_LOCATION)
 
     elif numberOfTurnsSkipped >= 2:
         whiteCount, blackCount = count_pieces(board)
@@ -187,15 +69,12 @@ def game_state(board, screen, font, color, pos, turns, mouseClicked):
         else:
             message = "Game Over. It was a Tie."
 
-        textSurface = font.render(message, False, 'black')
-        screen.blit(textSurface, TEXT_LOCATION)
+        write_text(message, screen, font, 'black', TURN_LOCATION)
 
     #Put Score Text
     whiteCount, blackCount = count_pieces(board)
-    textSurface = font.render(f"White: {whiteCount}", False, 'black')
-    screen.blit(textSurface, WHITE_SCORE_LOCATION)
-    textSurface = font.render(f"Black: {blackCount}", False, 'black')
-    screen.blit(textSurface, BLACK_SCORE_LOCATION)
+    write_text(f"White: {whiteCount}", screen, font, 'black', WHITE_SCORE_LOCATION)
+    write_text(f"Black: {blackCount}", screen, font, 'black', BLACK_SCORE_LOCATION)
 
     #Draw the Board
     pygame.draw.rect(screen, BOARD_GREEN, (BOARD_START, BOARD_DIMENSIONS), border_radius = BOARD_EDGE_RADIUS) 
@@ -205,16 +84,15 @@ def game_state(board, screen, font, color, pos, turns, mouseClicked):
         center = get_piece_location(i, j)
         pygame.draw.rect(screen, LIGHT_BOARD_GREEN, ((center[0] - NEXT_PIECE_OFFSET / 2, center[1] - NEXT_PIECE_OFFSET / 2), (NEXT_PIECE_OFFSET, NEXT_PIECE_OFFSET)))
 
-    #Draw the Lines Around the Board
-    pygame.draw.rect(screen, "black", (BOARD_START, (BOARD_DIMENSIONS[0] + BORDER_THICKNESS, BOARD_DIMENSIONS[1] + BORDER_THICKNESS)), 
+    #Draw the Lines Around the Board and Through the Board
+    pygame.draw.rect(screen, "black", (BOARD_START, tuple_op(BOARD_DIMENSIONS, BORDER_THICKNESS, ADD_DIGIT)), 
                     border_radius = BOARD_EDGE_RADIUS, width = BORDER_THICKNESS)
-
     line_offset = NEXT_PIECE_OFFSET
     for i in range(7):
-        pygame.draw.line(screen, "black", (BOARD_START[0] + line_offset, BOARD_START[1]), 
-        (BOARD_START[0] + line_offset, BOARD_START[1] + BOARD_DIMENSIONS[1]), width = LINE_THICKNESS)
-        pygame.draw.line(screen, "black", (BOARD_START[0], BOARD_START[1] + line_offset), 
-        (BOARD_START[0] + BOARD_DIMENSIONS[0], BOARD_START[1] + line_offset), width = LINE_THICKNESS)
+        pygame.draw.line(screen, "black", tuple_op(BOARD_START, (line_offset, 0), ADD_TUPLE), 
+            tuple_op(BOARD_START, (line_offset, BOARD_DIMENSIONS[1]), ADD_TUPLE), width = LINE_THICKNESS)
+        pygame.draw.line(screen, "black", tuple_op(BOARD_START, (0, line_offset), ADD_TUPLE), 
+            tuple_op(BOARD_START, (BOARD_DIMENSIONS[0], line_offset), ADD_TUPLE), width = LINE_THICKNESS)
         
         line_offset += NEXT_PIECE_OFFSET
 
@@ -238,6 +116,46 @@ def game_state(board, screen, font, color, pos, turns, mouseClicked):
 
     return current_color, numberOfTurnsSkipped
 
+def mid_game_menu_state(screen, regular_font, title_font, pos, mouseClicked):
+    #Draw Background
+    screen.fill(BACKGROUND_GREEN)
+
+    #Title
+    pygame.draw.rect(screen, TEXT_BOX_ORANGE, (tuple_op(MENU_TITLE_LOCATION, TEXT_BOX_OFFSET, SUB_TUPLE), 
+                MIDMENU_TITLE_BOX), border_radius = TEXT_BOX_CORNER)
+    pygame.draw.rect(screen, "black", (tuple_op(MENU_TITLE_LOCATION, TEXT_BOX_OFFSET, SUB_TUPLE), 
+                    MIDMENU_TITLE_BOX), border_radius = TEXT_BOX_CORNER, width = TITLE_BORDER)
+    write_text("In-Game Options", screen, title_font, "black", MENU_TITLE_LOCATION)
+
+    #Options (Back to Game, Home Menu, Exit)
+    rg_top_left, rg_bot_right = create_rg_box(screen, regular_font)
+    menu_tl, menu_br = create_menu_box(screen, regular_font)
+    quit_tl, quit_br = create_mm_quit(screen, regular_font)
+
+    #Option Logic
+    if mouseClicked:
+        if within_box(pos[0], pos[1], rg_top_left, rg_bot_right):
+            return GAME_STATE
+        elif within_box(pos[0], pos[1], menu_tl, menu_br):
+            return MENU_STATE
+        elif within_box(pos[0], pos[1], quit_tl, quit_br):
+            return QUIT_STATE
+
+    return MENU_MIDGAME_STATE
+
+def menu_state(screen, regular_font, title_font, pos, mouseClicked):
+    #Draw Background
+    screen.fill(BACKGROUND_GREEN)
+
+    #Spacing Reference Lines (will delete)
+    pygame.draw.line(screen, "black", (SCREEN_DIMENSIONS[0]/2, 0), 
+        (SCREEN_DIMENSIONS[0]/2, SCREEN_DIMENSIONS[1]), width = LINE_THICKNESS)
+    pygame.draw.line(screen, "black", (0, SCREEN_DIMENSIONS[1]/2), 
+        (SCREEN_DIMENSIONS[0], SCREEN_DIMENSIONS[1]/2), width = LINE_THICKNESS)
+
+
+    return MENU_STATE
+
 
 #Create Board and Setup Starting Pieces. 1 Stands for White, 2 Stands for Black.
 board = [[0 for i in range(8)] for j in range(8)]
@@ -245,23 +163,27 @@ board[3][3] = 1
 board[4][4] = 1
 board[3][4] = 2
 board[4][3] = 2
-
+ 
 current_color = 2 #Represents Black
 numberOfTurnsSkipped = 0 #If gets to two and the timer passes, end game.
 end_time = datetime.now() + timedelta(seconds=TIME_IDLE_QUIT) #For when the game ends.
-state = 1 #0 will be menu state, 1 is game state
+state = GAME_STATE #Works with the States listed in Constants
 
 #Pygame Initialization
 pygame.init()
-statusFont = pygame.font.SysFont('Times New Roman', 25)
+tnrMediumFont = pygame.font.SysFont('Times New Roman', 25)
+tnrMenuFont = pygame.font.SysFont('Times New Roman', 35)
+tnrLargeFont = pygame.font.SysFont('Times New Roman', 50)
 screen = pygame.display.set_mode(SCREEN_DIMENSIONS)
 pygame.display.set_caption("Othello")
+pygame.key.set_repeat()
 clock = pygame.time.Clock()
 running = True
 
-
+#Game Loop
 while running:
     mouseClicked = False
+    mPressed = False
     current_time = datetime.now()
     pos = (0, 0)
 
@@ -269,19 +191,44 @@ while running:
         if event.type == pygame.MOUSEBUTTONUP:
             pos = pygame.mouse.get_pos()
             mouseClicked = True
+        elif event.type == pygame.KEYDOWN:
+            pressed = pygame.key.get_pressed()
+        elif event.type == pygame.KEYUP:
+            if pressed[pygame.K_m]:
+                mPressed = True
         elif event.type == pygame.QUIT:
-            running = False
+            state = QUIT_STATE
 
-    if state == 1:
-        current_color, numberOfTurnsSkipped = game_state(board, screen, statusFont, current_color, pos, numberOfTurnsSkipped, mouseClicked)
+    #State Selection
+    if state == MENU_STATE:
+        state = menu_state(screen, tnrMenuFont, tnrLargeFont, pos, mouseClicked)
+    elif state == CREATE_GAME_STATE:
+        pass
+    elif state == GAME_STATE:
+        current_color, numberOfTurnsSkipped = game_state(board, screen, tnrMediumFont, current_color, pos, numberOfTurnsSkipped, mouseClicked)
+        if mPressed:
+            state = MENU_MIDGAME_STATE
+    elif state == MENU_MIDGAME_STATE:
+        state = mid_game_menu_state(screen, tnrMenuFont, tnrLargeFont, pos, mouseClicked)
+    elif state == RESTART_GAME_STATE:
+        pass
+    elif state == INFO_STATE:
+        pass
+    elif state == CREDITS_STATE:
+        pass
+    elif state == QUIT_STATE:
+        running = False
+    else:
+        print("State Error.")
+        state = QUIT_STATE
 
-    pygame.display.flip()
-    clock.tick(FPS)
-    
     #Timer to Break out from Program if idle for too long
     if mouseClicked:
         end_time = datetime.now() + timedelta(seconds=TIME_IDLE_QUIT)
-    if current_time >= end_time:
-        break
+    elif current_time >= end_time:
+        state = QUIT_STATE
+
+    pygame.display.flip()
+    clock.tick(FPS) 
 
 pygame.quit()
