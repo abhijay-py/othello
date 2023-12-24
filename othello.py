@@ -236,7 +236,9 @@ def credits_state(screen, text_font, menu_font, title_font, pos, mouseClicked):
 def create_game_state(board, screen, menu_font, title_font, pos, mouseClicked):
     new_board = create_new_board()
     new_color = 2
-    return GAME_STATE, new_board, new_color
+    new_player = ("player", 1)
+    
+    return GAME_STATE, new_board, new_color, new_player
 
 
 #Create Board and Setup Starting Pieces. 1 Stands for White, 2 Stands for Black.
@@ -281,7 +283,7 @@ while running:
     if state == MENU_STATE:
         state = menu_state(screen, tnrMenuFont, tnrLargeFont, pos, mouseClicked)
     elif state == CREATE_GAME_STATE:
-        state, board, current_color = create_game_state(board, screen, tnrMenuFont, tnrLargeFont, pos, mouseClicked)
+        state, board, current_color, player = create_game_state(board, screen, tnrMenuFont, tnrLargeFont, pos, mouseClicked)
     elif state == GAME_STATE:
         current_color, numberOfTurnsSkipped = game_state(board, screen, tnrMediumFont, current_color, pos, numberOfTurnsSkipped, mouseClicked, player)
         if mPressed:
