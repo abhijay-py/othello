@@ -141,3 +141,19 @@ def create_box(screen, font, text, loc, box):
     write_text(text, screen, font, "black", loc)
 
     return tl, br
+
+#Checks if a player can place a move now
+def can_play(current_color, player_name, player_color):
+    if current_color == player_color and player_name != "player":
+        return False
+    return True
+
+#Create a new board
+def create_new_board():
+    board = [[0 for i in range(8)] for j in range(8)]
+    board[3][3] = 1
+    board[4][4] = 1
+    board[3][4] = 2
+    board[4][3] = 2
+
+    return board
