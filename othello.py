@@ -10,8 +10,8 @@ from helper_files.ai_algorithms import algorithm_picker
 
 
 #STATES
-#TODO: ADD BOXES AROUND TEXT AND ADD A RESTART STATE WITHIN
-def game_state(board, screen, font, color, pos, turns, mouseClicked, player):
+#TODO: ADD A RESTART STATE WITHIN
+def game_state(board, screen, font, color, pos, turns, mouseClicked, player, lastMove):
     #Assign inputs to state variables
     numberOfTurnsSkipped = turns 
     current_color = color
@@ -23,38 +23,54 @@ def game_state(board, screen, font, color, pos, turns, mouseClicked, player):
 
     #Gets whether a current user can play
     user_can_play = can_play(current_color, player_name, player_color)
+    move = lastMove
+    gameEnded = False
 
     if len(moveList) == 0:
         current_color = switch_colors(current_color)
         numberOfTurnsSkipped += 1
+        if numberOfTurnsSkipped >= 2:
+            gameEnded = True
+        else:
+            return current_color, numberOfTurnsSkipped, move
     else:
         numberOfTurnsSkipped = 0
 
     #Place a piece down.
-    if mouseClicked and within_board(pos[0], pos[1]) and user_can_play:
+    if mouseClicked and within_board(pos[0], pos[1]) and user_can_play and not gameEnded:
         x, y = pos
         x_coord = int((x - BOARD_START[0]) / NEXT_PIECE_OFFSET)
         y_coord = int((y - BOARD_START[1]) / NEXT_PIECE_OFFSET)
 
         if board[x_coord][y_coord] == 0 and (x_coord, y_coord) in moveList:
+            move = (x_coord, y_coord)
             strCoords = str(x_coord) + str(y_coord)
             board[x_coord][y_coord] = current_color
             for i, j in moveDict[strCoords]:
                 board[i][j] = current_color
             current_color = switch_colors(current_color)
-    elif not user_can_play:
-        algorithm_picker(board, moveList, moveDict, current_color, player_name)
+    elif not user_can_play and not gameEnded:
+        mover = algorithm_picker(board, moveList, moveDict, current_color, player_name)
+        x_coord, y_coord = mover
+
+        if board[x_coord][y_coord] == 0 and (x_coord, y_coord) in moveList:
+            move = (x_coord, y_coord)
+            strCoords = str(x_coord) + str(y_coord)
+            board[x_coord][y_coord] = current_color
+            for i, j in moveDict[strCoords]:
+                board[i][j] = current_color
+            current_color = switch_colors(current_color)
 
     #Fill in the Background
     screen.fill(BACKGROUND_BLUE)
 
     #Put Turn Text
-    if numberOfTurnsSkipped == 0:
+    if not gameEnded:
         color_word = 'White'
         if current_color == 2:
             color_word = 'Black'
         write_text(color_word + "'s Turn to Move.", screen, font, 'black', TURN_LOCATION)
-    elif numberOfTurnsSkipped >= 2:
+    else:
         whiteCount, blackCount = count_pieces(board)
         if whiteCount > blackCount:
             message = "Game Over. White Won!"
@@ -73,12 +89,15 @@ def game_state(board, screen, font, color, pos, turns, mouseClicked, player):
     #Draw the Board
     pygame.draw.rect(screen, BOARD_GREEN, (BOARD_START, BOARD_DIMENSIONS), border_radius = BOARD_EDGE_RADIUS) 
 
-    #Highlight Possible Moves
+    #Highlight Possible Moves and the Last Move
     if user_can_play:
         for i, j in moveList:
             center = get_piece_location(i, j)
             pygame.draw.rect(screen, LIGHT_BOARD_GREEN, ((center[0] - NEXT_PIECE_OFFSET / 2, center[1] - NEXT_PIECE_OFFSET / 2), (NEXT_PIECE_OFFSET, NEXT_PIECE_OFFSET)))
-
+        if move[0] != -1 and not gameEnded:
+            center = get_piece_location(move[0], move[1])
+            pygame.draw.rect(screen, BOARD_YELLOW, ((center[0] - NEXT_PIECE_OFFSET / 2, center[1] - NEXT_PIECE_OFFSET / 2), (NEXT_PIECE_OFFSET, NEXT_PIECE_OFFSET)))
+            
     #Draw the Lines Around the Board and Through the Board
     pygame.draw.rect(screen, "black", (BOARD_START, tuple_op(BOARD_DIMENSIONS, BORDER_THICKNESS, ADD_DIGIT)), 
                     border_radius = BOARD_EDGE_RADIUS, width = BORDER_THICKNESS)
@@ -109,7 +128,7 @@ def game_state(board, screen, font, color, pos, turns, mouseClicked, player):
                 pygame.draw.circle(screen, color, piece_location, PIECE_RADIUS)
                 pygame.draw.circle(screen, BORDER_RED, piece_location, PIECE_RADIUS, width = PIECE_BORDER_THICKNESS)
 
-    return current_color, numberOfTurnsSkipped
+    return current_color, numberOfTurnsSkipped, move
 
 def mid_game_menu_state(screen, regular_font, title_font, pos, mouseClicked):
     #Draw Background
@@ -229,9 +248,6 @@ def credits_state(screen, text_font, menu_font, title_font, pos, mouseClicked):
 
     return CREDITS_STATE
 
-
-    return CREDITS_STATE
-
 def create_game_state(board, screen, menu_font, title_font, pos, mouseClicked, boxesPicked):
     #Color Vars
     colors = [] #pvp, easy, med, hard, expert, black, white, start
@@ -302,6 +318,7 @@ end_time = datetime.now() + timedelta(seconds=TIME_IDLE_QUIT) #For when the game
 state = MENU_STATE #Works with the States listed in Constants
 player = ("player", 1) #The opponent the user is playing
 boxes_selected = [] #Selected boxes in create game
+lastMove = (-1, -1) #The last move made.
 
 #Pygame Initialization
 pygame.init()
@@ -339,9 +356,11 @@ while running:
     elif state == CREATE_GAME_STATE:
         board = create_new_board()
         current_color = 2
+        lastMove = (-1, -1)
         state, player, boxes_selected = create_game_state(board, screen, tnrMenuFont, tnrLargeFont, pos, mouseClicked, boxes_selected)
     elif state == GAME_STATE:
-        current_color, numberOfTurnsSkipped = game_state(board, screen, tnrMediumFont, current_color, pos, numberOfTurnsSkipped, mouseClicked, player)
+        current_color, numberOfTurnsSkipped, lastMove = game_state(board, screen, tnrMediumFont, current_color, pos, 
+                                                                    numberOfTurnsSkipped, mouseClicked, player, lastMove)
         if mPressed:
             state = MENU_MIDGAME_STATE
     elif state == MENU_MIDGAME_STATE:
