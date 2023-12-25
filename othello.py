@@ -16,7 +16,8 @@ from helper_files.constants import RG_LOCATION, RG_BOX, MIDMENU_LOCATION, MIDMEN
 from helper_files.constants import MM_QUIT_LOCATION, MENU_TITLE_BOX, INFO_TITLE_LOCATION, INFO_TITLE_BOX
 from helper_files.constants import NG_LOCATION, NG_BOX, INFO_LOCATION, INFO_BOX, CRED_LOCATION, CRED_BOX
 from helper_files.constants import INFO_TEXT_LOCATION, MENU_TITLE_LOCATION, TEXT_OFFSET, BACK_I_LOC
-from helper_files.constants import BACK_I_BOX
+from helper_files.constants import BACK_BOX, CRED_TITLE_BOX, CRED_TITLE_LOCATION, CRED_TEXT_LOCATION
+from helper_files.constants import BACK_C_LOC
 
 #Importing Helpers + AIs
 from helper_files.helpers import switch_colors, try_remove, get_piece_location, within_board, within_board_coords
@@ -213,7 +214,7 @@ def info_state(screen, text_font, menu_font, title_font, pos, mouseClicked):
         tuple_op(INFO_TEXT_LOCATION, (15, 7*TEXT_OFFSET), ADD_TUPLE))
 
     #Back to Menu
-    back_tl, back_br = create_box(screen, menu_font, "Back", BACK_I_LOC, BACK_I_BOX)
+    back_tl, back_br = create_box(screen, menu_font, "Back", BACK_I_LOC, BACK_BOX)
 
     #Option Logic
     if mouseClicked and within_box(pos[0], pos[1], back_tl, back_br):
@@ -225,15 +226,33 @@ def credits_state(screen, text_font, menu_font, title_font, pos, mouseClicked):
     #Draw Background
     screen.fill(BACKGROUND_GREEN)
 
-    #Spacing Reference Lines (will delete)
-    pygame.draw.line(screen, "black", (SCREEN_DIMENSIONS[0]/2, 0), 
-        (SCREEN_DIMENSIONS[0]/2, SCREEN_DIMENSIONS[1]), width = LINE_THICKNESS)
-    pygame.draw.line(screen, "black", (0, SCREEN_DIMENSIONS[1]/2), 
-        (SCREEN_DIMENSIONS[0], SCREEN_DIMENSIONS[1]/2), width = LINE_THICKNESS)
+    #Title
+    pygame.draw.rect(screen, TEXT_BOX_ORANGE, (tuple_op(CRED_TITLE_LOCATION, TEXT_BOX_OFFSET, SUB_TUPLE), 
+                CRED_TITLE_BOX), border_radius = TEXT_BOX_CORNER)
+    pygame.draw.rect(screen, "black", (tuple_op(CRED_TITLE_LOCATION, TEXT_BOX_OFFSET, SUB_TUPLE), 
+                CRED_TITLE_BOX), border_radius = TEXT_BOX_CORNER, width = TITLE_BORDER)
+    write_text("Credits", screen, title_font, "black", CRED_TITLE_LOCATION)
+
+    #Text
+    write_text("Created by Abhijay Achukola (abhijay_py).", screen, text_font, "black", CRED_TEXT_LOCATION)
+    write_text("Inspired by Varun Asuri's Othello AI.", screen, text_font, "black", 
+        tuple_op(CRED_TEXT_LOCATION, (25, TEXT_OFFSET), ADD_TUPLE))
+    #Back to Menu
+    back_tl, back_br = create_box(screen, menu_font, "Back", BACK_C_LOC, BACK_BOX)
+
+    #Option Logic
+    if mouseClicked and within_box(pos[0], pos[1], back_tl, back_br):
+        return MENU_STATE
+
+    return CREDITS_STATE
+
 
     return CREDITS_STATE
 
 def create_game_state(board, screen, menu_font, title_font, pos, mouseClicked):
+    #Draw Background
+    screen.fill(BACKGROUND_BLUE)
+
     new_board = create_new_board()
     new_color = 2
     new_player = ("player", 1)
