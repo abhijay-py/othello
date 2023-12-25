@@ -49,7 +49,7 @@ def game_state(board, screen, font, color, pos, turns, mouseClicked, player, las
             for i, j in moveDict[strCoords]:
                 board[i][j] = current_color
             current_color = switch_colors(current_color)
-    elif not user_can_play and not gameEnded:
+    elif not user_can_play and not gameEnded and move[0] != -1:
         mover = algorithm_picker(board, moveList, moveDict, current_color, player_name)
         x_coord, y_coord = mover
 
@@ -60,7 +60,9 @@ def game_state(board, screen, font, color, pos, turns, mouseClicked, player, las
             for i, j in moveDict[strCoords]:
                 board[i][j] = current_color
             current_color = switch_colors(current_color)
-
+    elif move[0] == -1:
+        move = (-2, -2)
+    
     #Fill in the Background
     screen.fill(BACKGROUND_BLUE)
 
@@ -93,10 +95,10 @@ def game_state(board, screen, font, color, pos, turns, mouseClicked, player, las
     if user_can_play:
         for i, j in moveList:
             center = get_piece_location(i, j)
-            pygame.draw.rect(screen, LIGHT_BOARD_GREEN, ((center[0] - NEXT_PIECE_OFFSET / 2, center[1] - NEXT_PIECE_OFFSET / 2), (NEXT_PIECE_OFFSET, NEXT_PIECE_OFFSET)))
+            pygame.draw.rect(screen, LIGHT_BOARD_GREEN, ((center[0] - NEXT_PIECE_OFFSET / 2, center[1] - NEXT_PIECE_OFFSET / 2), (NEXT_PIECE_OFFSET, NEXT_PIECE_OFFSET)), border_radius = BOARD_EDGE_RADIUS)
         if move[0] != -1 and not gameEnded:
             center = get_piece_location(move[0], move[1])
-            pygame.draw.rect(screen, BOARD_YELLOW, ((center[0] - NEXT_PIECE_OFFSET / 2, center[1] - NEXT_PIECE_OFFSET / 2), (NEXT_PIECE_OFFSET, NEXT_PIECE_OFFSET)))
+            pygame.draw.rect(screen, BOARD_YELLOW, ((center[0] - NEXT_PIECE_OFFSET / 2, center[1] - NEXT_PIECE_OFFSET / 2), (NEXT_PIECE_OFFSET, NEXT_PIECE_OFFSET)), border_radius = BOARD_EDGE_RADIUS)
             
     #Draw the Lines Around the Board and Through the Board
     pygame.draw.rect(screen, "black", (BOARD_START, tuple_op(BOARD_DIMENSIONS, BORDER_THICKNESS, ADD_DIGIT)), 
@@ -245,7 +247,6 @@ def credits_state(screen, text_font, menu_font, title_font, pos, mouseClicked):
     #Option Logic
     if mouseClicked and within_box(pos[0], pos[1], back_tl, back_br):
         return MENU_STATE
-
     return CREDITS_STATE
 
 def create_game_state(board, screen, menu_font, title_font, pos, mouseClicked, boxesPicked):
