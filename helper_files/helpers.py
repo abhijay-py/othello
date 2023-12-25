@@ -1,9 +1,6 @@
 import pygame
 
-from helper_files.constants import FIRST_PIECE, NEXT_PIECE_OFFSET, FIRST_PIECE, NEXT_PIECE_OFFSET
-from helper_files.constants import BOARD_START, BOARD_DIMENSIONS, ANTIALIAS_SETTING
-from helper_files.constants import ADD_TUPLE, SUB_TUPLE, MULT_TUPLE, ADD_DIGIT, SUB_DIGIT, MULT_DIGIT
-from helper_files.constants import TEXT_BOX_OFFSET, TEXT_BOX_CORNER, OPTION_BORDER, TEXT_BOX_GREEN
+from helper_files.constants import *
 
 #HELPER FUNCTIONS
 #Switches between colors
@@ -130,13 +127,13 @@ def tuple_op(tuple_1, num_2, operation):
         return (tuple_1[0] - num_2, tuple_1[1] - num_2)
     elif operation == MULT_DIGIT:
         return (tuple_1[0] * num_2, tuple_1[1] * num_2)
-    
-#Create a text box
-def create_box(screen, font, text, loc, box):
+
+#Create a colored text box
+def create_box_color(screen, font, text, loc, box, color):
     tl = tuple_op(loc, TEXT_BOX_OFFSET, SUB_TUPLE)
     br = tuple_op(tl, box, ADD_TUPLE)
 
-    pygame.draw.rect(screen, TEXT_BOX_GREEN, (tl, box), border_radius = TEXT_BOX_CORNER)
+    pygame.draw.rect(screen, color, (tl, box), border_radius = TEXT_BOX_CORNER)
     pygame.draw.rect(screen, "black", (tl, box), border_radius = TEXT_BOX_CORNER, width = OPTION_BORDER)
     write_text(text, screen, font, "black", loc)
 
@@ -147,6 +144,40 @@ def can_play(current_color, player_name, player_color):
     if current_color == player_color and player_name != "player":
         return False
     return True
+
+#Selects a specific box
+def select_box(color_list, number, select_type):
+    new_color_list = []
+
+    if select_type == "diff":
+        new_color_list.append(number)
+        for i in color_list:
+            if i >= 5:
+                new_color_list.append(i)
+    elif select_type == "color":
+        new_color_list.append(number)
+        for i in color_list:
+            if i < 5:
+                new_color_list.append(i)
+    else:
+        print("Select Error.")
+        new_color_list = color_list
+
+    return new_color_list
+
+#Get Selections
+def get_selections(color_list):
+    info_dict = {0 : "player", 1 : "easy", 2 : "medium", 3 : "hard", 4: "expert", 5: 1, 6: 2}
+    player_name = "player"
+    player_color = 1
+
+    for i in color_list:
+        if i < 5:
+            player_name = info_dict[i]
+        else:
+            player_color = info_dict[i]
+
+    return (player_name, player_color)
 
 #Create a new board
 def create_new_board():

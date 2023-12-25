@@ -2,27 +2,10 @@ import pygame
 from datetime import datetime, timedelta
 
 #Importing Constants
-from helper_files.constants import ADD_TUPLE, SUB_TUPLE, MULT_TUPLE, ADD_DIGIT, SUB_DIGIT, MULT_DIGIT
-from helper_files.constants import BOARD_GREEN, LIGHT_BOARD_GREEN, BACKGROUND_BLUE, BACKGROUND_GREEN 
-from helper_files.constants import BORDER_RED, TEXT_BOX_ORANGE, SCREEN_DIMENSIONS, LINE_THICKNESS
-from helper_files.constants import BOARD_EDGE_RADIUS, BOARD_DIMENSIONS, BOARD_START, BORDER_THICKNESS
-from helper_files.constants import TURN_LOCATION, BLACK_SCORE_LOCATION, WHITE_SCORE_LOCATION
-from helper_files.constants import PIECE_OFFSET, PIECE_BORDER_THICKNESS, PIECE_RADIUS, FIRST_PIECE
-from helper_files.constants import MENU_TITLE_LOCATION_MM, TEXT_BOX_OFFSET, TITLE_BORDER, TEXT_BOX_CORNER
-from helper_files.constants import MIDMENU_TITLE_BOX, TIME_IDLE_QUIT, FPS, NEXT_PIECE_OFFSET
-from helper_files.constants import MENU_STATE, CREATE_GAME_STATE, GAME_STATE, MENU_MIDGAME_STATE
-from helper_files.constants import INFO_STATE, CREDITS_STATE, QUIT_STATE, ANTIALIAS_SETTING, QUIT_LOCATION
-from helper_files.constants import RG_LOCATION, RG_BOX, MIDMENU_LOCATION, MIDMENU_BOX, QUIT_BOX
-from helper_files.constants import MM_QUIT_LOCATION, MENU_TITLE_BOX, INFO_TITLE_LOCATION, INFO_TITLE_BOX
-from helper_files.constants import NG_LOCATION, NG_BOX, INFO_LOCATION, INFO_BOX, CRED_LOCATION, CRED_BOX
-from helper_files.constants import INFO_TEXT_LOCATION, MENU_TITLE_LOCATION, TEXT_OFFSET, BACK_I_LOC
-from helper_files.constants import BACK_BOX, CRED_TITLE_BOX, CRED_TITLE_LOCATION, CRED_TEXT_LOCATION
-from helper_files.constants import BACK_C_LOC
+from helper_files.constants import *
 
 #Importing Helpers + AIs
-from helper_files.helpers import switch_colors, try_remove, get_piece_location, within_board, within_board_coords
-from helper_files.helpers import within_box, all_moves, count_pieces, write_text, tuple_op, create_box
-from helper_files.helpers import can_play, create_new_board
+from helper_files.helpers import *
 from helper_files.ai_algorithms import algorithm_picker
 
 
@@ -140,9 +123,9 @@ def mid_game_menu_state(screen, regular_font, title_font, pos, mouseClicked):
     write_text("In-Game Options", screen, title_font, "black", MENU_TITLE_LOCATION_MM)
 
     #Options (Back to Game, Home Menu, Exit)
-    rg_top_left, rg_bot_right = create_box(screen, regular_font, "Resume Game", RG_LOCATION, RG_BOX)
-    menu_tl, menu_br = create_box(screen, regular_font, "Back to Menu", MIDMENU_LOCATION, MIDMENU_BOX)
-    quit_tl, quit_br = create_box(screen, regular_font, "Exit", MM_QUIT_LOCATION, QUIT_BOX)
+    rg_top_left, rg_bot_right = create_box_color(screen, regular_font, "Resume Game", RG_LOCATION, RG_BOX, TEXT_BOX_GREEN)
+    menu_tl, menu_br = create_box_color(screen, regular_font, "Back to Menu", MIDMENU_LOCATION, MIDMENU_BOX, TEXT_BOX_GREEN)
+    quit_tl, quit_br = create_box_color(screen, regular_font, "Exit", MM_QUIT_LOCATION, QUIT_BOX, TEXT_BOX_GREEN)
 
     #Option Logic
     if mouseClicked:
@@ -167,10 +150,10 @@ def menu_state(screen, regular_font, title_font, pos, mouseClicked):
     write_text("OTHELLO", screen, title_font, "black", MENU_TITLE_LOCATION)
 
     #Options (New Game, Info, Credits, Exit)
-    ng_top_left, ng_bot_right = create_box(screen, regular_font, "New Game", NG_LOCATION, NG_BOX)
-    info_tl, info_br = create_box(screen, regular_font, "Information", INFO_LOCATION, INFO_BOX)
-    cred_tl, cred_br = create_box(screen, regular_font, "Credits", CRED_LOCATION, CRED_BOX)
-    quit_tl, quit_br = create_box(screen, regular_font, "Exit", QUIT_LOCATION, QUIT_BOX)
+    ng_top_left, ng_bot_right = create_box_color(screen, regular_font, "New Game", NG_LOCATION, NG_BOX, TEXT_BOX_GREEN)
+    info_tl, info_br = create_box_color(screen, regular_font, "Information", INFO_LOCATION, INFO_BOX, TEXT_BOX_GREEN)
+    cred_tl, cred_br = create_box_color(screen, regular_font, "Credits", CRED_LOCATION, CRED_BOX, TEXT_BOX_GREEN)
+    quit_tl, quit_br = create_box_color(screen, regular_font, "Exit", QUIT_LOCATION, QUIT_BOX, TEXT_BOX_GREEN)
 
     #Option Logic
     if mouseClicked:
@@ -214,7 +197,7 @@ def info_state(screen, text_font, menu_font, title_font, pos, mouseClicked):
         tuple_op(INFO_TEXT_LOCATION, (15, 7*TEXT_OFFSET), ADD_TUPLE))
 
     #Back to Menu
-    back_tl, back_br = create_box(screen, menu_font, "Back", BACK_I_LOC, BACK_BOX)
+    back_tl, back_br = create_box_color(screen, menu_font, "Back", BACK_I_LOC, BACK_BOX, TEXT_BOX_GREEN)
 
     #Option Logic
     if mouseClicked and within_box(pos[0], pos[1], back_tl, back_br):
@@ -238,7 +221,7 @@ def credits_state(screen, text_font, menu_font, title_font, pos, mouseClicked):
     write_text("Inspired by Varun Asuri's Othello AI.", screen, text_font, "black", 
         tuple_op(CRED_TEXT_LOCATION, (25, TEXT_OFFSET), ADD_TUPLE))
     #Back to Menu
-    back_tl, back_br = create_box(screen, menu_font, "Back", BACK_C_LOC, BACK_BOX)
+    back_tl, back_br = create_box_color(screen, menu_font, "Back", BACK_C_LOC, BACK_BOX, TEXT_BOX_GREEN)
 
     #Option Logic
     if mouseClicked and within_box(pos[0], pos[1], back_tl, back_br):
@@ -249,15 +232,66 @@ def credits_state(screen, text_font, menu_font, title_font, pos, mouseClicked):
 
     return CREDITS_STATE
 
-def create_game_state(board, screen, menu_font, title_font, pos, mouseClicked):
+def create_game_state(board, screen, menu_font, title_font, pos, mouseClicked, boxesPicked):
+    #Color Vars
+    colors = [] #pvp, easy, med, hard, expert, black, white, start
+    for i in range(9):
+        if i in boxesPicked:
+            colors.append(TEXT_BOX_YELLOW)
+        else:
+            colors.append(TEXT_BOX_GREEN)
+    
+    new_boxes_picked = boxesPicked
+
     #Draw Background
     screen.fill(BACKGROUND_BLUE)
 
-    new_board = create_new_board()
-    new_color = 2
+    #Title
+    pygame.draw.rect(screen, TEXT_BOX_ORANGE, (tuple_op(CG_TITLE_LOCATION, TEXT_BOX_OFFSET, SUB_TUPLE), 
+                CG_TITLE_BOX), border_radius = TEXT_BOX_CORNER)
+    pygame.draw.rect(screen, "black", (tuple_op(CG_TITLE_LOCATION, TEXT_BOX_OFFSET, SUB_TUPLE), 
+                CG_TITLE_BOX), border_radius = TEXT_BOX_CORNER, width = TITLE_BORDER)
+    write_text("Create A New Game", screen, title_font, "black", CG_TITLE_LOCATION)
+
+
+    write_text("Select a Difficulty:", screen, menu_font, "black", DIFF_S_LOCATION)
+    pvp_tl, pvp_br = create_box_color(screen, menu_font, "Human", PVP_LOCATION, PVP_BOX, colors[0])
+    easy_tl, easy_br = create_box_color(screen, menu_font, "Easy", EASY_LOCATION, EASY_BOX, colors[1])
+    med_tl, med_br = create_box_color(screen, menu_font, "Medium", MEDIUM_LOCATION, MEDIUM_BOX, colors[2])
+    hard_tl, hard_br = create_box_color(screen, menu_font, "Hard", HARD_LOCATION, HARD_BOX, colors[3])
+    exp_tl, exp_br = create_box_color(screen, menu_font, "Expert", EXPERT_LOCATION, EXPERT_BOX, colors[4])
+    
+    write_text("Select a Color:", screen, menu_font, "black", COLOR_S_LOCATION)
+    bl_tl, bl_br = create_box_color(screen, menu_font, "Black", BLACK_LOCATION, BLACK_BOX, colors[5])
+    wh_tl, wh_br = create_box_color(screen, menu_font, "White", WHITE_LOCATION, WHITE_BOX, colors[6])
+
+    star_tl, star_br = create_box_color(screen, menu_font, "Start", START_LOCATION, START_BOX, colors[7])
+    back_tl, back_br = create_box_color(screen, menu_font, "Back", BACK_CG_LOC, BACK_CG_BOX, colors[8])
     new_player = ("player", 1)
     
-    return GAME_STATE, new_board, new_color, new_player
+    #Option Logic
+    if mouseClicked:
+        if within_box(pos[0], pos[1], pvp_tl, pvp_br):
+            new_boxes_picked = select_box(boxesPicked, 0, "diff")
+        elif within_box(pos[0], pos[1], easy_tl, easy_br):
+            new_boxes_picked = select_box(boxesPicked, 1, "diff")
+        elif within_box(pos[0], pos[1], med_tl, med_br):
+            new_boxes_picked = select_box(boxesPicked, 2, "diff")
+        elif within_box(pos[0], pos[1], hard_tl, hard_br):
+            new_boxes_picked = select_box(boxesPicked, 3, "diff")
+        elif within_box(pos[0], pos[1], exp_tl, exp_br):
+            new_boxes_picked = select_box(boxesPicked, 4, "diff")
+        elif within_box(pos[0], pos[1], bl_tl, bl_br):
+            new_boxes_picked = select_box(boxesPicked, 5, "color")
+        elif within_box(pos[0], pos[1], wh_tl, wh_br):
+            new_boxes_picked = select_box(boxesPicked, 6, "color")
+        elif within_box(pos[0], pos[1], star_tl, star_br):
+            new_player = get_selections(boxesPicked)
+            return GAME_STATE, new_player, new_boxes_picked
+        elif within_box(pos[0], pos[1], back_tl, back_br):
+            return MENU_STATE, new_player, new_boxes_picked
+    
+    return CREATE_GAME_STATE, new_player, new_boxes_picked
 
 
 #Create Board and Setup Starting Pieces. 1 Stands for White, 2 Stands for Black.
@@ -267,6 +301,7 @@ numberOfTurnsSkipped = 0 #If gets to two and the timer passes, end game.
 end_time = datetime.now() + timedelta(seconds=TIME_IDLE_QUIT) #For when the game ends.
 state = MENU_STATE #Works with the States listed in Constants
 player = ("player", 1) #The opponent the user is playing
+boxes_selected = [] #Selected boxes in create game
 
 #Pygame Initialization
 pygame.init()
@@ -302,7 +337,9 @@ while running:
     if state == MENU_STATE:
         state = menu_state(screen, tnrMenuFont, tnrLargeFont, pos, mouseClicked)
     elif state == CREATE_GAME_STATE:
-        state, board, current_color, player = create_game_state(board, screen, tnrMenuFont, tnrLargeFont, pos, mouseClicked)
+        board = create_new_board()
+        current_color = 2
+        state, player, boxes_selected = create_game_state(board, screen, tnrMenuFont, tnrLargeFont, pos, mouseClicked, boxes_selected)
     elif state == GAME_STATE:
         current_color, numberOfTurnsSkipped = game_state(board, screen, tnrMediumFont, current_color, pos, numberOfTurnsSkipped, mouseClicked, player)
         if mPressed:
