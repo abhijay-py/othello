@@ -1,4 +1,6 @@
 import pygame
+import os
+from datetime import datetime
 from helper_files.constants import *
 
 #HELPER FUNCTIONS
@@ -268,3 +270,54 @@ def min_max(board, heuristic, ai_color, curr_color, depth, is_ai, numSkips, outs
         return value
     else:
         return move_to_make
+
+#Output Board
+def output_board(board, num_moves, player, file:None):
+    output_string = f"Board #{num_moves}:\n"
+    for i in board:
+        new_line = []
+        for j in i:
+            if j == 0:
+                new_line.append(' ')
+            elif j == 1:
+                new_line.append('W')
+            else:
+                new_line.append('B')
+        output_string += str(new_line) + "\n"
+
+    if LOG_LOCATION == LOG_TO_PRINT:
+        print(output_string)
+    elif LOG_LOCATION == LOG_TO_FILE:
+        now = datetime.now()
+        datetimestring = now.strftime("%Y%m%d-%H%M%S")
+        if player[0] == "player":
+            name = "pvp"
+        else:
+            name = player[0]
+        
+        if player[1] == 0:
+            color = "w"
+        else:
+            color = "b"
+ 
+        if file == None:
+            file_name = f"othello_log_{name}_{color}_{datetimestring}.txt"
+            file_location = f"logs/{file_name}"
+            try:
+                with open(file_location, "x") as f:
+                    f.write(output_string)
+            except Exception as e:
+                print(f"File {file_name} Exists!")        
+        else:
+            file_name = file
+            file_location = f"logs/{file_name}"
+            with open(file_location, "a") as f:
+                f.write(output_string)
+
+        return file_name
+    elif LOG_LOCATION == NO_LOG:
+        pass
+    else:
+        print("Invalid Log Location.")
+
+    return None

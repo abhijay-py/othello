@@ -11,7 +11,7 @@ from helper_files.ai_algorithms import algorithm_picker
 
 #STATES
 #TODO: ADD A RESTART STATE WITHIN
-def game_state(board, screen, font, color, pos, turns, mouseClicked, player, lastMove):
+def game_state(board, screen, font, color, pos, turns, mouseClicked, player, lastMove, log_file):
     #Assign inputs to state variables
     numberOfTurnsSkipped = turns 
     current_color = color
@@ -25,6 +25,8 @@ def game_state(board, screen, font, color, pos, turns, mouseClicked, player, las
     user_can_play = can_play(current_color, player_name, player_color)
     move = lastMove
     gameEnded = False
+    counted = count_pieces(board)
+    totalMoves = counted[0] + counted[1] - 4
 
     if len(moveList) == 0:
         current_color = switch_colors(current_color)
@@ -32,7 +34,7 @@ def game_state(board, screen, font, color, pos, turns, mouseClicked, player, las
         if numberOfTurnsSkipped >= 2:
             gameEnded = True
         else:
-            return current_color, numberOfTurnsSkipped, move
+            return current_color, numberOfTurnsSkipped, move, log_file
     else:
         numberOfTurnsSkipped = 0
 
@@ -43,23 +45,39 @@ def game_state(board, screen, font, color, pos, turns, mouseClicked, player, las
         y_coord = int((y - BOARD_START[1]) / NEXT_PIECE_OFFSET)
 
         if board[x_coord][y_coord] == 0 and (x_coord, y_coord) in moveList:
+            #For Logs
+            if totalMoves == 0:
+                log_file = output_board(board, totalMoves, player, log_file)
+
+            #Move Code
             move = (x_coord, y_coord)
             strCoords = str(x_coord) + str(y_coord)
             board[x_coord][y_coord] = current_color
             for i, j in moveDict[strCoords]:
                 board[i][j] = current_color
             current_color = switch_colors(current_color)
+
+            #For Logs
+            log_file = output_board(board, totalMoves + 1, player, log_file)
     elif not user_can_play and not gameEnded and move[0] != -1:
         mover = algorithm_picker(board, moveList, moveDict, current_color, player_name)
         x_coord, y_coord = mover
 
         if board[x_coord][y_coord] == 0 and (x_coord, y_coord) in moveList:
+            #For Logs
+            if totalMoves == 0:
+                log_file = output_board(board, totalMoves, player, log_file)
+
+            #Move Code
             move = (x_coord, y_coord)
             strCoords = str(x_coord) + str(y_coord)
             board[x_coord][y_coord] = current_color
             for i, j in moveDict[strCoords]:
                 board[i][j] = current_color
             current_color = switch_colors(current_color)
+
+            #For Logs
+            log_file = output_board(board, totalMoves + 1, player, log_file)
     elif move[0] == -1:
         move = (-2, -2)
     
@@ -130,7 +148,7 @@ def game_state(board, screen, font, color, pos, turns, mouseClicked, player, las
                 pygame.draw.circle(screen, color, piece_location, PIECE_RADIUS)
                 pygame.draw.circle(screen, BORDER_RED, piece_location, PIECE_RADIUS, width = PIECE_BORDER_THICKNESS)
 
-    return current_color, numberOfTurnsSkipped, move
+    return current_color, numberOfTurnsSkipped, move, log_file
 
 def mid_game_menu_state(screen, regular_font, title_font, pos, mouseClicked):
     #Draw Background
@@ -320,6 +338,7 @@ state = MENU_STATE #Works with the States listed in Constants
 player = ("player", 1) #The opponent the user is playing
 boxes_selected = [] #Selected boxes in create game
 lastMove = (-1, -1) #The last move made.
+log_file = None
 
 #Pygame Initialization
 pygame.init()
@@ -360,8 +379,8 @@ while running:
         lastMove = (-1, -1)
         state, player, boxes_selected = create_game_state(board, screen, tnrMenuFont, tnrLargeFont, pos, mouseClicked, boxes_selected)
     elif state == GAME_STATE:
-        current_color, numberOfTurnsSkipped, lastMove = game_state(board, screen, tnrMediumFont, current_color, pos, 
-                                                                    numberOfTurnsSkipped, mouseClicked, player, lastMove)
+        current_color, numberOfTurnsSkipped, lastMove, log_file = game_state(board, screen, tnrMediumFont, current_color, pos, 
+                                                                    numberOfTurnsSkipped, mouseClicked, player, lastMove, log_file)
         if mPressed:
             state = MENU_MIDGAME_STATE
     elif state == MENU_MIDGAME_STATE:
