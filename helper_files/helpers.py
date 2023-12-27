@@ -273,7 +273,12 @@ def min_max(board, heuristic, ai_color, curr_color, depth, is_ai, numSkips, outs
 
 #Output Board
 def output_board(board, num_moves, player, file:None):
-    output_string = f"Board #{num_moves}:\n"
+    if player[0] == "player":
+            name = "pvp"
+    else:
+            name = player[0]
+
+    output_string = f"Board #{num_moves} vs {name}:\n"
     for i in board:
         new_line = []
         for j in i:
@@ -290,10 +295,6 @@ def output_board(board, num_moves, player, file:None):
     elif LOG_LOCATION == LOG_TO_FILE:
         now = datetime.now()
         datetimestring = now.strftime("%Y%m%d-%H%M%S")
-        if player[0] == "player":
-            name = "pvp"
-        else:
-            name = player[0]
         
         if player[1] == 0:
             color = "w"
@@ -303,6 +304,9 @@ def output_board(board, num_moves, player, file:None):
         if file == None:
             file_name = f"othello_log_{name}_{color}_{datetimestring}.txt"
             file_location = f"logs/{file_name}"
+            directory_exists = os.path.isdir("logs")
+            if not directory_exists:
+                os.mkdir("logs")
             try:
                 with open(file_location, "x") as f:
                     f.write(output_string)
