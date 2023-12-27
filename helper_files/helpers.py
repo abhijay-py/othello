@@ -1,8 +1,18 @@
 import pygame
-
 from helper_files.constants import *
 
 #HELPER FUNCTIONS
+#Copys 2D List
+def copy_2d_list(list_to_copy):
+    new_list = []
+    for i in list_to_copy:
+        internal_list = []
+        for j in i:
+            internal_list.append(j)
+        new_list.append(internal_list)
+
+    return new_list
+
 #Switches between colors
 def switch_colors(color):
     if color == 1:
@@ -188,3 +198,72 @@ def create_new_board():
     board[4][3] = 2
 
     return board
+
+#Returns scoring of the current position given a certain heuristic
+def get_score_ml(board, heuristic):
+    white_score = 0
+    black_score = 0
+
+    for i in range(8):
+        for j in range(8):
+            if board[i][j] == 1:
+                white_score += heuristic[i][j]
+            elif board[i][j] == 2:
+                black_score += heuristic[i][j]
+
+    return (white_score, black_score)
+
+#Get score of board for a color 
+def evaluate_board(board, heuristic, ai_color):
+    scoring = get_score_ml(board, heuristic)
+
+    if ai_color == 1:
+        score = scoring[0] - scoring[1]
+    else:
+        score = scoring[1] - scoring[0]
+
+    return score
+
+#Making a move for a prediciton algorithm
+def make_move_pred(old_board, move, moveDict, color):
+    board = copy_2d_list(old_board)
+    x_coord, y_coord = move
+    strCoords = str(x_coord) + str(y_coord)
+    board[x_coord][y_coord] = color
+    for i, j in moveDict[strCoords]:
+        board[i][j] = color
+    
+    return board
+
+#Algorithm
+def min_max(board, heuristic, ai_color, curr_color, depth, is_ai, numSkips, outsideCall):
+    gameOver = numSkips >= 2
+    moves, moveDict = all_moves(board, curr_color)
+    move_to_make = None
+
+    if depth == 0 or gameOver:
+        value = evaluate_board(board, heuristic, ai_color) 
+    elif len(moves) == 0:
+        new_color = switch_colors(curr_color)
+        value = min_max(board, heuristic, ai_color, new_color, depth, not is_ai, numSkips + 1, False)
+    elif is_ai:
+        value = -999999
+        
+        for move in moves:
+            temp_board = make_move_pred(board, move, moveDict, curr_color)
+            new_color = switch_colors(curr_color)
+            prev_value = value
+            value = max(value, min_max(temp_board, heuristic, ai_color, new_color, depth - 1, False, 0, False))
+            if prev_value != value and outsideCall:
+                move_to_make = move
+    else:
+        value = 999999
+        for move in moves:
+            temp_board = make_move_pred(board, move, moveDict, curr_color)
+            new_color = switch_colors(curr_color)
+            value = min(value, min_max(temp_board, heuristic, ai_color, new_color, depth - 1, True, 0, False))
+    
+    if not outsideCall:
+        return value
+    else:
+        return move_to_make
