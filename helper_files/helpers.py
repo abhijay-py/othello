@@ -87,7 +87,8 @@ def all_moves(board, color):
                         while within_board_coords(x_new, y_new):
                             if board[x_new][y_new] == color:
                                 validSpace = True
-                                move_removed.extend(tempRemoved)                        
+                                move_removed.extend(tempRemoved)    
+                                break                    
                             elif board[x_new][y_new] == 0:
                                 break
                             else:
