@@ -338,7 +338,7 @@ state = MENU_STATE #Works with the States listed in Constants
 player = ("player", 1) #The opponent the user is playing
 boxes_selected = [] #Selected boxes in create game
 lastMove = (-1, -1) #The last move made.
-log_file = None
+log_file = None #initialize log_file variable
 
 #Pygame Initialization
 pygame.init()
