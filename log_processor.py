@@ -165,6 +165,7 @@ def process_log_file(file, path_to_file):
 
     return True, hasEnded, num_boards, algorithm, piece_count, boards
 
+#Output info from the log_file
 def output_log_file_info(file, path_to_file):
     valid, hasEnded, num_turns, info_text, piece_count, boards = process_log_file(file, path_to_file)
     print()
@@ -201,6 +202,12 @@ def output_log_file_info(file, path_to_file):
     print()
     return boards
 
+#TODO: possibly add more specific stats and fun facts from the file
 
-file = get_log_files("logs")[0]
+print()
+
+files = get_log_files("logs")
+file = files[0]
+print(files)
+
 boards = output_log_file_info(file, "logs")
