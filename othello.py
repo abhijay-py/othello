@@ -1,4 +1,7 @@
 import pygame
+import sys
+import os
+import traceback
 from datetime import datetime, timedelta
 
 #Importing Constants
@@ -7,6 +10,37 @@ from helper_files.constants import *
 #Importing Helpers + AIs
 from helper_files.helpers import *
 from helper_files.ai_algorithms import algorithm_picker
+
+#Logging Specifications
+if LOG_LOCATION == LOG_TO_FILE:
+    #Logging STDOUT to check for uncaught errors
+    now = datetime.now()
+    datetimestring = now.strftime("%Y%m%d-%H%M%S")
+    orig_stdout = sys.stdout
+    directory_exists = os.path.isdir("logs")
+    if not directory_exists:
+        os.mkdir("logs")
+
+    #Remove log files
+    files = [i for i in os.listdir('logs') if i[:11] != "othello_log"]
+    if len(files) > 4:
+        dateDict = {}
+        dates = []
+        for file in files:
+            date = datetime.strptime(file[:-4], "%Y%m%d-%H%M%S")
+            dateDict[file[:-4]] = file
+            dates.append(date)
+        for i in range(4):
+            newest = max(dates)
+            newStr = newest.strftime("%Y%m%d-%H%M%S")
+            poppedFile = dateDict[newStr]
+            dates.remove(newest)
+            files.remove(poppedFile)
+        for file in files:
+            os.remove(f"logs/{file}") 
+
+    f = open(f'logs/{datetimestring}.txt', 'w')
+    sys.stdout = f
 
 
 #STATES
@@ -328,82 +362,96 @@ def create_game_state(board, screen, menu_font, title_font, pos, mouseClicked, b
     
     return CREATE_GAME_STATE, new_player, new_boxes_picked
 
+#Main Loop
+def main():
+    #Create Board and Setup Starting Pieces. 1 Stands for White, 2 Stands for Black.
+    board = create_new_board()
+    current_color = 2 #Represents Black
+    numberOfTurnsSkipped = 0 #If gets to two and the timer passes, end game.
+    end_time = datetime.now() + timedelta(seconds=TIME_IDLE_QUIT) #For when the game ends.
+    state = MENU_STATE #Works with the States listed in Constants
+    player = ("player", 1) #The opponent the user is playing
+    boxes_selected = [] #Selected boxes in create game
+    lastMove = (-1, -1) #The last move made.
+    log_file = None #initialize log_file variable
 
-#Create Board and Setup Starting Pieces. 1 Stands for White, 2 Stands for Black.
-board = create_new_board()
-current_color = 2 #Represents Black
-numberOfTurnsSkipped = 0 #If gets to two and the timer passes, end game.
-end_time = datetime.now() + timedelta(seconds=TIME_IDLE_QUIT) #For when the game ends.
-state = MENU_STATE #Works with the States listed in Constants
-player = ("player", 1) #The opponent the user is playing
-boxes_selected = [] #Selected boxes in create game
-lastMove = (-1, -1) #The last move made.
-log_file = None #initialize log_file variable
+    #Pygame Initialization
+    pygame.init()
+    tnrMediumFont = pygame.font.SysFont('Times New Roman', 25)
+    tnrMenuFont = pygame.font.SysFont('Times New Roman', 35)
+    tnrLargeFont = pygame.font.SysFont('Times New Roman', 50)
+    screen = pygame.display.set_mode(SCREEN_DIMENSIONS)
+    pygame.display.set_caption("Othello")
+    pygame.key.set_repeat()
+    clock = pygame.time.Clock()
+    running = True
 
-#Pygame Initialization
-pygame.init()
-tnrMediumFont = pygame.font.SysFont('Times New Roman', 25)
-tnrMenuFont = pygame.font.SysFont('Times New Roman', 35)
-tnrLargeFont = pygame.font.SysFont('Times New Roman', 50)
-screen = pygame.display.set_mode(SCREEN_DIMENSIONS)
-pygame.display.set_caption("Othello")
-pygame.key.set_repeat()
-clock = pygame.time.Clock()
-running = True
+    #Game Loop
+    while running:
+        mouseClicked = False
+        mPressed = False
+        current_time = datetime.now()
+        pos = (0, 0)
 
-#Game Loop
-while running:
-    mouseClicked = False
-    mPressed = False
-    current_time = datetime.now()
-    pos = (0, 0)
+        if state != GAME_STATE and state != MENU_MIDGAME_STATE:
+            log_file = None
 
-    for event in pygame.event.get():
-        if event.type == pygame.MOUSEBUTTONUP:
-            pos = pygame.mouse.get_pos()
-            mouseClicked = True
-        elif event.type == pygame.KEYDOWN:
-            pressed = pygame.key.get_pressed()
-        elif event.type == pygame.KEYUP:
-            if pressed[pygame.K_m]:
-                mPressed = True
-        elif event.type == pygame.QUIT:
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONUP:
+                pos = pygame.mouse.get_pos()
+                mouseClicked = True
+            elif event.type == pygame.KEYDOWN:
+                pressed = pygame.key.get_pressed()
+            elif event.type == pygame.KEYUP:
+                if pressed[pygame.K_m]:
+                    mPressed = True
+            elif event.type == pygame.QUIT:
+                state = QUIT_STATE
+
+        #State Selection
+        if state == MENU_STATE:
+            state = menu_state(screen, tnrMenuFont, tnrLargeFont, pos, mouseClicked)
+        elif state == CREATE_GAME_STATE:
+            board = create_new_board()
+            current_color = 2
+            lastMove = (-1, -1)
+            state, player, boxes_selected = create_game_state(board, screen, tnrMenuFont, tnrLargeFont, pos, mouseClicked, boxes_selected)
+        elif state == GAME_STATE:
+            current_color, numberOfTurnsSkipped, lastMove, log_file = game_state(board, screen, tnrMediumFont, current_color, pos, 
+                                                                        numberOfTurnsSkipped, mouseClicked, player, lastMove, log_file)
+            if mPressed:
+                state = MENU_MIDGAME_STATE
+        elif state == MENU_MIDGAME_STATE:
+            state = mid_game_menu_state(screen, tnrMenuFont, tnrLargeFont, pos, mouseClicked)
+            if mPressed:
+                state = GAME_STATE
+        elif state == INFO_STATE:
+            state = info_state(screen, tnrMediumFont, tnrMenuFont, tnrLargeFont, pos, mouseClicked)
+        elif state == CREDITS_STATE:
+            state = credits_state(screen, tnrMediumFont, tnrMenuFont, tnrLargeFont, pos, mouseClicked)
+        elif state == QUIT_STATE:
+            running = False
+        else:
+            print("State Error.")
             state = QUIT_STATE
 
-    #State Selection
-    if state == MENU_STATE:
-        state = menu_state(screen, tnrMenuFont, tnrLargeFont, pos, mouseClicked)
-    elif state == CREATE_GAME_STATE:
-        board = create_new_board()
-        current_color = 2
-        lastMove = (-1, -1)
-        state, player, boxes_selected = create_game_state(board, screen, tnrMenuFont, tnrLargeFont, pos, mouseClicked, boxes_selected)
-    elif state == GAME_STATE:
-        current_color, numberOfTurnsSkipped, lastMove, log_file = game_state(board, screen, tnrMediumFont, current_color, pos, 
-                                                                    numberOfTurnsSkipped, mouseClicked, player, lastMove, log_file)
-        if mPressed:
-            state = MENU_MIDGAME_STATE
-    elif state == MENU_MIDGAME_STATE:
-        state = mid_game_menu_state(screen, tnrMenuFont, tnrLargeFont, pos, mouseClicked)
-        if mPressed:
-            state = GAME_STATE
-    elif state == INFO_STATE:
-        state = info_state(screen, tnrMediumFont, tnrMenuFont, tnrLargeFont, pos, mouseClicked)
-    elif state == CREDITS_STATE:
-        state = credits_state(screen, tnrMediumFont, tnrMenuFont, tnrLargeFont, pos, mouseClicked)
-    elif state == QUIT_STATE:
-        running = False
-    else:
-        print("State Error.")
-        state = QUIT_STATE
+        #Timer to Break out from Program if idle for too long
+        if mouseClicked:
+            end_time = datetime.now() + timedelta(seconds=TIME_IDLE_QUIT)
+        elif current_time >= end_time:
+            state = QUIT_STATE
 
-    #Timer to Break out from Program if idle for too long
-    if mouseClicked:
-        end_time = datetime.now() + timedelta(seconds=TIME_IDLE_QUIT)
-    elif current_time >= end_time:
-        state = QUIT_STATE
+        pygame.display.flip()
+        clock.tick(FPS) 
 
-    pygame.display.flip()
-    clock.tick(FPS) 
-
+if __name__ ==  "__main__":
+    try:
+        main()
+        print("No Errors.")
+    except Exception as e:
+        print(traceback.format_exc())
+    
 pygame.quit()
+if LOG_LOCATION == LOG_TO_FILE:
+    sys.stdout = orig_stdout
+    f.close()

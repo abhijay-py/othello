@@ -271,6 +271,37 @@ def min_max(board, heuristic, ai_color, curr_color, depth, is_ai, numSkips, outs
     else:
         return move_to_make
 
+#Get datetime from file name of log_files
+def get_datetime_from_log_file(log_file):
+    underscore_count = 0
+    datetime_string = ''
+    for i in log_file:
+        if i == '_':
+            underscore_count += 1
+        elif underscore_count >= 4:
+            datetime_string += i
+    return datetime_string
+
+#Remove old log_files
+def remove_old_log_files():
+    files = [i for i in os.listdir('logs') if i[:11] == "othello_log"]
+    if len(files) > 9:
+        dateDict = {}
+        dates = []
+        for file in files:
+            dateStr = get_datetime_from_log_file(file)[:-4]
+            date = datetime.strptime(dateStr, "%Y%m%d-%H%M%S")
+            dateDict[dateStr] = file
+            dates.append(date)
+        for i in range(10):
+            newest = max(dates)
+            newStr = newest.strftime("%Y%m%d-%H%M%S")
+            poppedFile = dateDict[newStr]
+            dates.remove(newest)
+            files.remove(poppedFile)
+        for file in files:
+            os.remove(f"logs/{file}") 
+
 #Output Board
 def output_board(board, num_moves, player, file:None):
     if player[0] == "player":
@@ -293,13 +324,14 @@ def output_board(board, num_moves, player, file:None):
     if LOG_LOCATION == LOG_TO_PRINT:
         print(output_string)
     elif LOG_LOCATION == LOG_TO_FILE:
+        remove_old_log_files()
         now = datetime.now()
         datetimestring = now.strftime("%Y%m%d-%H%M%S")
         
-        if player[1] == 0:
-            color = "w"
-        else:
+        if player[1] == 1:
             color = "b"
+        else:
+            color = "w"
  
         if file == None:
             file_name = f"othello_log_{name}_{color}_{datetimestring}.txt"
