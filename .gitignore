@@ -2,3 +2,5 @@ testing.py
 othello.spec
 build
 dist
+__pycache__
+logs
