@@ -36,13 +36,8 @@ def hard_algorithm(board, moveList, moveDict, current_color):
 def expert_algorithm(board, moveList, moveDict, current_color):
     count = count_pieces(board)
     empty = 64 - count[0] - count[1]
-    if empty > 50:
-        depth = 3
-    elif empty < 20:
-        depth = 5
-    else:
-        depth = 2
-    return min_max(board, boardHeuristic, current_color, current_color, depth, True, 0, True)
+    depth = 5
+    return min_max(board, boardHeuristic, current_color, current_color, depth, True, 0, True, -999999, 999999)
 
 #Pick which algorithm to choose
 def algorithm_picker(board, moveList, moveDict, current_color, algorithm_name):

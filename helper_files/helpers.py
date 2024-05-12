@@ -239,7 +239,7 @@ def make_move_pred(old_board, move, moveDict, color):
     return board
 
 #Algorithm
-def min_max(board, heuristic, ai_color, curr_color, depth, is_ai, numSkips, outsideCall):
+def min_max(board, heuristic, ai_color, curr_color, depth, is_ai, numSkips, outsideCall, alpha, beta):
     gameOver = numSkips >= 2
     moves, moveDict = all_moves(board, curr_color)
     move_to_make = None
@@ -248,7 +248,7 @@ def min_max(board, heuristic, ai_color, curr_color, depth, is_ai, numSkips, outs
         value = evaluate_board(board, heuristic, ai_color) 
     elif len(moves) == 0:
         new_color = switch_colors(curr_color)
-        value = min_max(board, heuristic, ai_color, new_color, depth, not is_ai, numSkips + 1, False)
+        value = min_max(board, heuristic, ai_color, new_color, depth, not is_ai, numSkips + 1, False, alpha, beta)
     elif is_ai:
         value = -999999
         
@@ -256,15 +256,21 @@ def min_max(board, heuristic, ai_color, curr_color, depth, is_ai, numSkips, outs
             temp_board = make_move_pred(board, move, moveDict, curr_color)
             new_color = switch_colors(curr_color)
             prev_value = value
-            value = max(value, min_max(temp_board, heuristic, ai_color, new_color, depth - 1, False, 0, False))
+            value = max(value, min_max(temp_board, heuristic, ai_color, new_color, depth - 1, False, 0, False, alpha, beta))
+            alpha = max(alpha, value)
             if prev_value != value and outsideCall:
                 move_to_make = move
+            if beta <= alpha:
+                break
     else:
         value = 999999
         for move in moves:
             temp_board = make_move_pred(board, move, moveDict, curr_color)
             new_color = switch_colors(curr_color)
-            value = min(value, min_max(temp_board, heuristic, ai_color, new_color, depth - 1, True, 0, False))
+            value = min(value, min_max(temp_board, heuristic, ai_color, new_color, depth - 1, True, 0, False, alpha, beta))
+            beta = min(beta, value)
+            if beta <= alpha:
+                break
     
     if not outsideCall:
         return value
