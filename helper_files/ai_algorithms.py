@@ -30,7 +30,7 @@ def medium_algorithm(board, moveList, moveDict, current_color):
 
 #Minimax Algorithm with Depth 2
 def hard_algorithm(board, moveList, moveDict, current_color):
-    return min_max(board, boardHeuristic, current_color, current_color, 2, True, 0, True)
+    return min_max(board, boardHeuristic, current_color, current_color, 2, True, 0, True,  -999999, 999999)
 
 #Minimax Algorithm with Depths of 3, 2, 5 in early, mid, and late game
 def expert_algorithm(board, moveList, moveDict, current_color):
